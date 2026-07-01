@@ -95,7 +95,26 @@ public class MessageService {
 	            );
 
 	    return messages.stream()
+
+	            .filter(message -> {
+
+	                // Sender deleted the message
+	                if (message.getSender().getUsername().equals(user1)
+	                        && message.isDeletedBySender()) {
+	                    return false;
+	                }
+
+	                // Receiver deleted the message
+	                if (message.getReceiver().getUsername().equals(user1)
+	                        && message.isDeletedByReceiver()) {
+	                    return false;
+	                }
+
+	                return true;
+	            })
+
 	            .map(message -> new ChatHistoryResponse(
+	                    message.getId(),
 	                    message.getSender().getUsername(),
 	                    message.getContent(),
 	                    message.getTimestamp(),
@@ -146,16 +165,45 @@ public class MessageService {
         return messageRepository.findAll();
     }
     
+    
     public List<ChatHistoryResponse> getChatHistory() {
 
         return messageRepository.findAll()
                 .stream()
                 .map(message -> new ChatHistoryResponse(
+                        message.getId(),
                         message.getSender().getUsername(),
                         message.getContent(),
                         message.getTimestamp(),
-                        message.getStatus()))
+                        message.getStatus()
+                ))
                 .collect(Collectors.toList());
     }
+    
+    
+    
+    public void deleteForMe(Long messageId, String username) {
+
+        Message message = messageRepository.findById(messageId)
+                .orElseThrow(() ->
+                        new RuntimeException("Message not found"));
+
+        if (message.getSender().getUsername().equals(username)) {
+
+            message.setDeletedBySender(true);
+
+        } else if (message.getReceiver().getUsername().equals(username)) {
+
+            message.setDeletedByReceiver(true);
+
+        } else {
+
+            throw new RuntimeException("You are not allowed to delete this message");
+
+        }
+
+        messageRepository.save(message);
+    }
+    
     
 }

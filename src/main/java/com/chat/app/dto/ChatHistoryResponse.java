@@ -3,20 +3,34 @@ package com.chat.app.dto;
 import com.chat.app.enums.MessageStatus;
 
 public class ChatHistoryResponse {
-	private String sender;
-	private String content;
-	private String timestamp;
-	private MessageStatus status;
 
+    private Long id;
+    private String sender;
+    private String content;
+    private String timestamp;
+    private MessageStatus status;
 	public ChatHistoryResponse() {
 	}
 
-	public ChatHistoryResponse(String sender, String content, String timestamp, MessageStatus status) {
+	public ChatHistoryResponse(Long id,
+            String sender,
+            String content,
+            String timestamp,
+            MessageStatus status) {
 
-		this.sender = sender;
-		this.content = content;
-		this.timestamp = timestamp;
-		this.status = status;
+this.id = id;
+this.sender = sender;
+this.content = content;
+this.timestamp = timestamp;
+this.status = status;
+}
+	
+	public Long getId() {
+	    return id;
+	}
+
+	public void setId(Long id) {
+	    this.id = id;
 	}
 
 	public String getSender() {

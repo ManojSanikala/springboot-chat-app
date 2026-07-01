@@ -31,19 +31,28 @@ public class Message {
 	    @Enumerated(EnumType.STRING)
 	    private MessageStatus status;
 	    
+	    private boolean deletedBySender = false;
+
+	    private boolean deletedByReceiver = false;
+	    
 	    
 		public Message() {
 			super();
 		}
-		public Message(Long id, User sender, User receiver, String content, String timestamp, MessageStatus status) {
-			super();
-			this.id = id;
-			this.sender = sender;
-			this.receiver = receiver;
-			this.content = content;
-			this.timestamp = timestamp;
-			this.status = status;
-		}
+		public Message(Long id, User sender, User receiver, String content,
+	               String timestamp, MessageStatus status,
+	               boolean deletedBySender,
+	               boolean deletedByReceiver) {
+
+	    this.id = id;
+	    this.sender = sender;
+	    this.receiver = receiver;
+	    this.content = content;
+	    this.timestamp = timestamp;
+	    this.status = status;
+	    this.deletedBySender = deletedBySender;
+	    this.deletedByReceiver = deletedByReceiver;
+	}
 		public Long getId() {
 			return id;
 		}
@@ -81,6 +90,21 @@ public class Message {
 
 		public void setStatus(MessageStatus status) {
 		    this.status = status;
+		}
+		public boolean isDeletedBySender() {
+		    return deletedBySender;
+		}
+
+		public void setDeletedBySender(boolean deletedBySender) {
+		    this.deletedBySender = deletedBySender;
+		}
+
+		public boolean isDeletedByReceiver() {
+		    return deletedByReceiver;
+		}
+
+		public void setDeletedByReceiver(boolean deletedByReceiver) {
+		    this.deletedByReceiver = deletedByReceiver;
 		}
 		
 	    

@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.chat.app.dto.ChatMessage;
+import com.chat.app.dto.DeleteMessageEvent;
 import com.chat.app.dto.MessageStatusUpdate;
 import com.chat.app.dto.TypingMessage;
 import com.chat.app.repository.UserRepository;
@@ -99,6 +100,27 @@ public class ChatController {
 	            "/queue/status",
 	            "READ"
 	    );
+	}
+	
+	@MessageMapping("/delete")
+	public void deleteMessage(DeleteMessageEvent event,
+	                          Principal principal) {
+
+	    String username = principal.getName();
+
+	    messageService.deleteForMe(
+	            event.getMessageId(),
+	            username
+	    );
+
+	    event.setUsername(username);
+
+	    messagingTemplate.convertAndSendToUser(
+	            username,
+	            "/queue/delete",
+	            event
+	    );
+
 	}
 	
 	

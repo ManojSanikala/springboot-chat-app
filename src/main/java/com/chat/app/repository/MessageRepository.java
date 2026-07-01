@@ -27,4 +27,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 	        String receiver,
 	        MessageStatus status
 	);
+	
+	
 }

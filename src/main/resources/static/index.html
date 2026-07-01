@@ -167,8 +167,7 @@ function markAsRead(){
 
 }
 
-connect();
-loadUsers();
+
 
 let timer;
 
@@ -188,6 +187,8 @@ document.getElementById("message").addEventListener("input", function () {
 
 function loadUsers() {
 
+    console.log("Loading users...");
+
     let token = localStorage.getItem("token");
 
     fetch("/user/all", {
@@ -195,8 +196,13 @@ function loadUsers() {
             "Authorization": "Bearer " + token
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log("Status:", response.status);
+        return response.json();
+    })
     .then(users => {
+
+        console.log(users);
 
         let usersDiv = document.getElementById("users");
 
@@ -206,21 +212,17 @@ function loadUsers() {
 
             usersDiv.innerHTML += `
                 <div onclick="selectUser('${user.username}')"
-                     style="padding:10px;
-                            border-bottom:1px solid #ddd;
-                            cursor:pointer;">
-
+                     style="padding:10px;border-bottom:1px solid #ddd;cursor:pointer;">
                     👤 ${user.username}
-
                 </div>
             `;
-
         });
 
+    })
+    .catch(error => {
+        console.error(error);
     });
-
 }
-
 function selectUser(username){
 
     currentChatUser = username;
@@ -254,14 +256,48 @@ function loadConversation(receiver){
 
         messages.forEach(message => {
 
-            chat.innerHTML += `
-                <p>
-                    <b>${message.sender}</b> :
-                    ${message.content}
-                </p>
-            `;
+        	chat.innerHTML += `
+        		<div id="message-${message.id}"
+        	     style="margin-bottom:10px; border:1px solid #ccc; padding:5px;">
+        	        <b>${message.sender}</b> :
+        	        ${message.content}
+
+        	        <br>
+
+        	        <small>${message.status}</small>
+
+        	        <br>
+
+        	        <button onclick="deleteMessage(${message.id})">
+        	            Delete For Me
+        	        </button>
+
+        	    </div>
+        	`;
 
         });
+
+    });
+
+}
+
+function deleteMessage(messageId){
+
+    let token = localStorage.getItem("token");
+
+    fetch("/messages/delete/" + messageId,{
+
+        method:"DELETE",
+
+        headers:{
+            "Authorization":"Bearer " + token
+        }
+
+    })
+    .then(response=>response.text())
+    .then(data => {
+
+        document.getElementById("message-" + messageId).remove();
 
     });
 
@@ -272,7 +308,8 @@ function loadConversation(receiver){
 //    markAsRead();
 
 //});
-
+connect();
+loadUsers();
 </script>
 
 </body>
