@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login - Chat Application</title>
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <style>
+
+        * {
+            box-sizing:border-box;
+        }
+
+
+        body {
+
+            margin:0;
+
+            min-height:100vh;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            font-family:"Inter",sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #2196f3,
+                    #1565c0
+                );
+
+        }
+
+
+        .login-card {
+
+            width:400px;
+
+            max-width:90%;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:16px;
+
+            box-shadow:
+                0 15px 40px
+                rgba(0,0,0,.25);
+
+        }
+
+
+        .logo {
+
+            width:70px;
+
+            height:70px;
+
+            margin:auto;
+
+            border-radius:50%;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            background:#2196f3;
+
+            color:white;
+
+            font-size:30px;
+
+        }
+
+
+        h1 {
+
+            text-align:center;
+
+            margin:20px 0 5px;
+
+            color:#222;
+
+        }
+
+
+        .subtitle {
+
+            text-align:center;
+
+            color:#777;
+
+            font-size:14px;
+
+            margin-bottom:30px;
+
+        }
+
+
+        .input-group {
+
+            margin-bottom:18px;
+
+        }
+
+
+        .input-group label {
+
+            display:block;
+
+            margin-bottom:7px;
+
+            font-size:13px;
+
+            font-weight:600;
+
+            color:#444;
+
+        }
+
+
+        .input-box {
+
+            display:flex;
+
+            align-items:center;
+
+            border:1px solid #ddd;
+
+            border-radius:9px;
+
+            padding:0 12px;
+
+        }
+
+
+        .input-box i {
+
+            color:#777;
+
+        }
+
+
+        .input-box input {
+
+            width:100%;
+
+            border:none;
+
+            outline:none;
+
+            padding:13px 10px;
+
+            font-size:14px;
+
+        }
+
+
+        #loginButton {
+
+            width:100%;
+
+            border:none;
+
+            border-radius:9px;
+
+            padding:14px;
+
+            background:#2196f3;
+
+            color:white;
+
+            font-size:15px;
+
+            font-weight:600;
+
+            cursor:pointer;
+
+            margin-top:10px;
+
+        }
+
+
+        #loginButton:hover {
+
+            background:#1976d2;
+
+        }
+
+
+        #loginButton:disabled {
+
+            background:#90caf9;
+
+            cursor:not-allowed;
+
+        }
+
+
+        #errorMessage {
+
+            display:none;
+
+            margin-top:15px;
+
+            padding:10px;
+
+            border-radius:7px;
+
+            background:#ffebee;
+
+            color:#c62828;
+
+            font-size:13px;
+
+            text-align:center;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="login-card">
+
+
+    <div class="logo">
+
+        <i class="fa-solid fa-comments"></i>
+
+    </div>
+
+
+    <h1>
+        Welcome Back
+    </h1>
+
+
+    <div class="subtitle">
+
+        Sign in to your chat account
+
+    </div>
+
+
+    <form id="loginForm">
+
+
+        <div class="input-group">
+
+            <label>
+                Username
+            </label>
+
+
+            <div class="input-box">
+
+                <i class="fa-solid fa-user"></i>
+
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Enter username"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+
+        <div class="input-group">
+
+            <label>
+                Password
+            </label>
+
+
+            <div class="input-box">
+
+                <i class="fa-solid fa-lock"></i>
+
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter password"
+                    required
+                >
+
+            </div>
+
+        </div>
+
+
+        <button
+            id="loginButton"
+            type="submit"
+        >
+
+            <i class="fa-solid fa-right-to-bracket"></i>
+
+            &nbsp;
+
+            Login
+
+        </button>
+
+
+        <div id="errorMessage"></div>
+
+
+    </form>
+
+
+</div>
+
+
+
+<script>
+
+document
+    .getElementById("loginForm")
+    .addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+
+        const username =
+            document
+                .getElementById("username")
+                .value
+                .trim();
+
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        const button =
+            document.getElementById(
+                "loginButton"
+            );
+
+
+        const errorDiv =
+            document.getElementById(
+                "errorMessage"
+            );
+
+
+        errorDiv.style.display =
+            "none";
+
+
+        button.disabled =
+            true;
+
+
+        button.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Logging in...';
+
+
+        try {
+
+            console.log(
+                "Sending login request..."
+            );
+
+
+            const response =
+                await fetch(
+                    "/auth/login",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            username:
+                                username,
+
+                            password:
+                                password
+
+                        })
+
+                    }
+                );
+
+
+            console.log(
+                "Login HTTP status:",
+                response.status
+            );
+
+
+            /*
+             * Read response as TEXT first.
+             *
+             * This prevents:
+             * Unexpected end of JSON input
+             */
+
+            const responseText =
+                await response.text();
+
+
+            console.log(
+                "Login response:",
+                responseText
+            );
+
+
+            /*
+             * Empty response
+             */
+
+            if (
+                !responseText ||
+                responseText.trim() === ""
+            ) {
+
+                throw new Error(
+                    "Server returned an empty response. HTTP status: "
+                    + response.status
+                );
+
+            }
+
+
+            /*
+             * Convert JSON text
+             * into JavaScript object
+             */
+
+            let data;
+
+            try {
+
+                data =
+                    JSON.parse(
+                        responseText
+                    );
+
+            }
+            catch (jsonError) {
+
+                console.error(
+                    "Invalid JSON response:",
+                    responseText
+                );
+
+                throw new Error(
+                    "Server returned an invalid response."
+                );
+
+            }
+
+
+            /*
+             * Login failed
+             */
+
+            if (!response.ok) {
+
+                throw new Error(
+
+                    data.message ||
+                    data.error ||
+                    "Invalid username or password"
+
+                );
+
+            }
+
+
+            /*
+             * Login successful
+             */
+
+            console.log(
+                "Login successful:",
+                data
+            );
+
+
+            /*
+             * Your LoginResponse contains:
+             *
+             * private String token;
+             */
+
+            const token =
+                data.token;
+
+
+            if (!token) {
+
+                throw new Error(
+                    "JWT token was not returned by server."
+                );
+
+            }
+
+
+            /*
+             * Store JWT
+             */
+
+            localStorage.setItem(
+                "token",
+                token
+            );
+
+
+            console.log(
+                "JWT token stored successfully."
+            );
+
+
+            /*
+             * Open chat application
+             */
+
+            window.location.replace(
+                "/index.html"
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "LOGIN ERROR:",
+                error
+            );
+
+
+            errorDiv.textContent =
+                error.message ||
+                "Login failed";
+
+
+            errorDiv.style.display =
+                "block";
+
+
+            button.disabled =
+                false;
+
+
+            button.innerHTML =
+                '<i class="fa-solid fa-right-to-bracket"></i> &nbsp; Login';
+
+        }
+
+    });
+
+</script>
+
+
+</body>
+
+</html>

@@ -35,6 +35,12 @@ public class Message {
 
 	    private boolean deletedByReceiver = false;
 	    
+	    private boolean edited;
+	    
+	    private Long replyToMessageId;
+
+	    private String replyToContent;
+
 	    
 		public Message() {
 			super();
@@ -105,6 +111,30 @@ public class Message {
 
 		public void setDeletedByReceiver(boolean deletedByReceiver) {
 		    this.deletedByReceiver = deletedByReceiver;
+		}
+		
+		public boolean isEdited() {
+		    return edited;
+		}
+
+		public void setEdited(boolean edited) {
+		    this.edited = edited;
+		}
+		
+		public Long getReplyToMessageId() {
+		    return replyToMessageId;
+		}
+
+		public void setReplyToMessageId(Long replyToMessageId) {
+		    this.replyToMessageId = replyToMessageId;
+		}
+
+		public String getReplyToContent() {
+		    return replyToContent;
+		}
+
+		public void setReplyToContent(String replyToContent) {
+		    this.replyToContent = replyToContent;
 		}
 		
 	    

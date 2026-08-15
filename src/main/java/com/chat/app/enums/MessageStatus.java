@@ -6,6 +6,8 @@ public enum MessageStatus {
 
     DELIVERED,
 
-    READ
+    READ,
+
+    DELETED
 
 }

@@ -1,316 +1,966 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Chat App</title>
+<html lang="en">
 
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Chat Application</title>
+
+
+    <!-- ================= FONT AWESOME ================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+
+    <!-- ================= SOCKJS ================= -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
+    </script>
+
+
+    <!-- ================= STOMP ================= -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js">
+    </script>
+
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html,
+        body {
+
+            margin: 0;
+            padding: 0;
+
+            width: 100%;
+            height: 100%;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #eef2f7;
+
+            overflow: hidden;
+        }
+
+
+        /* =====================================================
+           APPLICATION
+        ===================================================== */
+
+        .app-container {
+
+            width: 100%;
+            height: 100vh;
+
+            display: flex;
+
+            background: white;
+        }
+
+
+        /* =====================================================
+           USERS PANEL
+        ===================================================== */
+
+        .users-panel {
+
+            width: 30%;
+            min-width: 260px;
+
+            height: 100%;
+
+            border-right: 1px solid #ddd;
+
+            background: #ffffff;
+
+            display: flex;
+
+            flex-direction: column;
+        }
+
+
+        /* =====================================================
+           USERS HEADER
+        ===================================================== */
+
+        .users-header {
+
+            height: 65px;
+
+            padding: 0 18px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            border-bottom: 1px solid #ddd;
+
+            background: #ffffff;
+
+            flex-shrink: 0;
+        }
+
+
+        .users-title {
+
+            margin: 0;
+
+            font-size: 20px;
+
+            font-weight: 600;
+
+            color: #222;
+        }
+
+
+        /* =====================================================
+           LOGOUT
+        ===================================================== */
+
+        .logout-button {
+
+            border: none;
+
+            background: #f44336;
+
+            color: white;
+
+            padding: 8px 12px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+        }
+
+
+        .logout-button:hover {
+
+            background: #d32f2f;
+        }
+
+
+        /* =====================================================
+           USERS LIST
+        ===================================================== */
+
+        #users {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            overflow-x: hidden;
+        }
+
+
+        /* =====================================================
+           CHAT PANEL
+        ===================================================== */
+
+        .chat-panel {
+
+            width: 70%;
+
+            height: 100%;
+
+            min-width: 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            background: #f5f7fb;
+        }
+
+
+        /* =====================================================
+           CHAT HEADER
+        ===================================================== */
+
+        .chat-header {
+
+            height: 65px;
+
+            background: white;
+
+            border-bottom: 1px solid #ddd;
+
+            padding: 0 20px;
+
+            display: flex;
+
+            align-items: center;
+
+            flex-shrink: 0;
+        }
+
+
+        .chat-header-icon {
+
+            width: 40px;
+            height: 40px;
+
+            min-width: 40px;
+
+            border-radius: 50%;
+
+            background: #2196f3;
+
+            color: white;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 12px;
+        }
+
+
+        .chat-header-info {
+
+            min-width: 0;
+
+            flex: 1;
+        }
+
+
+        #chatWith {
+
+            margin: 0;
+
+            font-size: 17px;
+
+            color: #222;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        #typing {
+
+            height: 18px;
+
+            color: #777;
+
+            font-size: 12px;
+
+            font-style: italic;
+
+            overflow: hidden;
+        }
+
+
+        /* =====================================================
+           CHAT AREA
+        ===================================================== */
+
+        #chat {
+
+            flex: 1;
+
+            min-height: 0;
+
+            overflow-y: auto;
+
+            overflow-x: hidden;
+
+            padding: 18px;
+
+            background: #f5f7fb;
+
+            scroll-behavior: smooth;
+        }
+
+
+        /* =====================================================
+           EMPTY CHAT
+        ===================================================== */
+
+        .empty-chat {
+
+            height: 100%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #888;
+
+            text-align: center;
+        }
+
+
+        .empty-chat i {
+
+            font-size: 45px;
+
+            margin-bottom: 12px;
+
+            color: #bbb;
+        }
+
+
+        .empty-chat div {
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           REPLY PREVIEW
+        ===================================================== */
+
+        #replyPreview {
+
+            display: none;
+
+            position: relative;
+
+            width: 100%;
+
+            background: white;
+
+            border-top: 1px solid #ddd;
+
+            border-left: 4px solid #2196f3;
+
+            padding: 9px 40px 9px 12px;
+
+            flex-shrink: 0;
+
+            max-height: 65px;
+
+            overflow: hidden;
+        }
+
+
+        #replyPreviewContent {
+
+            font-size: 13px;
+
+            color: #444;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        .cancel-reply {
+
+            position: absolute;
+
+            right: 10px;
+
+            top: 8px;
+
+            width: 25px;
+
+            height: 25px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: transparent;
+
+            color: #777;
+
+            font-size: 20px;
+
+            cursor: pointer;
+        }
+
+
+        .cancel-reply:hover {
+
+            background: #eee;
+        }
+
+
+        /* =====================================================
+           MESSAGE INPUT
+        ===================================================== */
+
+        .message-input-area {
+
+            min-height: 65px;
+
+            background: white;
+
+            border-top: 1px solid #ddd;
+
+            padding: 10px 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            flex-shrink: 0;
+        }
+
+
+        #message {
+
+            flex: 1;
+
+            min-width: 0;
+
+            height: 44px;
+
+            border: 1px solid #d0d5db;
+
+            border-radius: 23px;
+
+            outline: none;
+
+            padding: 0 17px;
+
+            font-size: 14px;
+
+            background: #f8f9fa;
+        }
+
+
+        #message:focus {
+
+            border-color: #2196f3;
+
+            background: white;
+
+            box-shadow:
+                0 0 0 2px
+                rgba(33, 150, 243, .08);
+        }
+
+
+        /* =====================================================
+           SEND BUTTON
+        ===================================================== */
+
+        .send-button {
+
+            width: 45px;
+
+            height: 45px;
+
+            min-width: 45px;
+
+            border: none;
+
+            border-radius: 50%;
+
+            background: #2196f3;
+
+            color: white;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 16px;
+
+            transition:
+                background .15s ease,
+                transform .15s ease;
+        }
+
+
+        .send-button:hover {
+
+            background: #1976d2;
+
+            transform: scale(1.03);
+        }
+
+
+        .send-button:active {
+
+            transform: scale(.96);
+        }
+
+
+        /* =====================================================
+           SCROLLBAR
+        ===================================================== */
+
+        #chat::-webkit-scrollbar,
+        #users::-webkit-scrollbar {
+
+            width: 6px;
+        }
+
+
+        #chat::-webkit-scrollbar-thumb,
+        #users::-webkit-scrollbar-thumb {
+
+            background: #c5c5c5;
+
+            border-radius: 10px;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 700px) {
+
+            .users-panel {
+
+                width: 35%;
+
+                min-width: 120px;
+            }
+
+
+            .chat-panel {
+
+                width: 65%;
+            }
+
+
+            .users-title {
+
+                font-size: 15px;
+            }
+
+
+            .logout-button span {
+
+                display: none;
+            }
+
+
+            .chat-header {
+
+                padding: 0 10px;
+            }
+
+
+            .chat-header-icon {
+
+                width: 34px;
+
+                height: 34px;
+
+                min-width: 34px;
+
+                margin-right: 7px;
+            }
+
+
+            #chatWith {
+
+                font-size: 14px;
+            }
+
+
+            #chat {
+
+                padding: 10px;
+            }
+
+
+            .message-input-area {
+
+                padding: 8px;
+            }
+
+
+            #message {
+
+                font-size: 13px;
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-<h2>Spring Boot Chat</h2>
+
+<!-- =====================================================
+     APPLICATION
+===================================================== -->
+
+<div class="app-container">
 
 
-<div style="display:flex; border:1px solid gray; height:450px;">
+    <!-- =================================================
+         USERS PANEL
+    ================================================== -->
 
-    <!-- Users -->
-    <div id="users"
-         style="width:30%;
-                border-right:1px solid gray;
-                padding:10px;
-                overflow-y:auto;">
+    <div class="users-panel">
 
-        <h3>Users</h3>
+
+        <!-- USERS HEADER -->
+
+        <div class="users-header">
+
+            <h2 class="users-title">
+
+                <i class="fa-solid fa-comments"></i>
+
+                Chat
+
+            </h2>
+
+
+            <button
+                type="button"
+                class="logout-button"
+                onclick="logout()"
+                title="Logout"
+            >
+
+                <i
+                    class="fa-solid fa-right-from-bracket">
+                </i>
+
+                <span>
+                    Logout
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- USERS -->
+
+        <div id="users">
+
+            <div
+                style="
+                    padding:20px;
+                    text-align:center;
+                    color:#888;
+                "
+            >
+
+                Loading users...
+
+            </div>
+
+        </div>
 
     </div>
 
-    <!-- Chat -->
-    <div style="width:70%; padding:10px;">
 
-        <h3 id="chatWith">Select User</h3>
+    <!-- =================================================
+         CHAT PANEL
+    ================================================== -->
 
-        <div id="typing"
-             style="color:gray;font-style:italic;"></div>
+    <div class="chat-panel">
 
-        <hr>
 
-        <div id="chat"
-             style="height:250px;
-                    overflow-y:auto;">
+        <!-- =================================================
+             CHAT HEADER
+        ================================================== -->
+
+        <div class="chat-header">
+
+            <div class="chat-header-icon">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+
+            <div class="chat-header-info">
+
+                <h3 id="chatWith">
+                    Select User
+                </h3>
+
+
+                <div id="typing"></div>
+
+            </div>
+
         </div>
 
-        <hr>
 
-        <input id="message"
-               placeholder="Type message..."
-               style="width:80%;">
+        <!-- =================================================
+             CHAT MESSAGES
 
-        <button onclick="sendMessage()">
-            Send
-        </button>
+             IMPORTANT:
+             ONLY ONE #chat ELEMENT
+        ================================================== -->
+
+        <div id="chat">
+
+            <div class="empty-chat">
+
+                <div>
+
+                    <i
+                        class="fa-regular fa-comments">
+                    </i>
+
+                    <div>
+                        Select a user to start chatting
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             REPLY PREVIEW
+        ================================================== -->
+
+        <div id="replyPreview">
+
+            <div
+                style="
+                    font-size:11px;
+                    color:#2196f3;
+                    font-weight:600;
+                    margin-bottom:3px;
+                "
+            >
+
+                Replying to message
+
+            </div>
+
+
+            <div id="replyPreviewContent">
+            </div>
+
+
+            <button
+                type="button"
+                class="cancel-reply"
+                onclick="cancelReply()"
+                title="Cancel reply"
+            >
+
+                ×
+
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             MESSAGE INPUT
+        ================================================== -->
+
+        <div class="message-input-area">
+
+            <input
+                id="message"
+                type="text"
+                placeholder="Type a message..."
+                autocomplete="off"
+            >
+
+
+            <button
+                type="button"
+                class="send-button"
+                onclick="sendMessage()"
+                title="Send message"
+            >
+
+                <i
+                    class="fa-solid fa-paper-plane">
+                </i>
+
+            </button>
+
+        </div>
 
     </div>
 
 </div>
 
+
+<!-- =====================================================
+     JAVASCRIPT FILES
+===================================================== -->
+
+<script src="/js/app.js"></script>
+
+<script src="/js/websocket.js"></script>
+
+<script src="/js/users.js"></script>
+
+<script src="/js/messages.js"></script>
+
+
+<!-- =====================================================
+     LOGOUT + LOGIN CHECK
+===================================================== -->
+
 <script>
 
-let stompClient = null;
-let currentChatUser = "";
+    /* =====================================================
+       LOGOUT
+    ===================================================== */
 
-function connect() {
+    function logout() {
 
-    let socket = new SockJS('/chat');
+        console.log(
+            "Logging out..."
+        );
 
-    stompClient = Stomp.over(socket);
 
-    let token = localStorage.getItem("token");
+        /*
+         * Stop WebSocket
+         */
 
-    let headers = {
-        Authorization: "Bearer " + token
-    };
+        if (
+            typeof stompClient !== "undefined" &&
+            stompClient &&
+            stompClient.connected
+        ) {
 
-    stompClient.connect(headers, function () {
+            try {
 
-        // Receive Chat Messages
-        stompClient.subscribe('/user/queue/messages', function(message){
+                stompClient.disconnect(
+                    function () {
 
-            let msg = JSON.parse(message.body);
+                        console.log(
+                            "WebSocket disconnected"
+                        );
 
-            document.getElementById("chat").innerHTML +=
-                "<p><b>"+msg.sender+"</b>: "+msg.content+"</p>";
+                    }
+                );
 
-            // Notify sender that message is delivered
-            stompClient.send("/app/delivered", {}, JSON.stringify({
-                sender: msg.sender
-            }));
-        });
+            }
+            catch (error) {
 
-        // Typing Indicator
-        stompClient.subscribe('/user/queue/typing', function(message){
-
-            let typing = JSON.parse(message.body);
-
-            let typingDiv = document.getElementById("typing");
-
-            if(typing.typing){
-
-                typingDiv.innerHTML =
-                    "<i>" + typing.sender + " is typing...</i>";
-
-            } else {
-
-                typingDiv.innerHTML = "";
+                console.error(
+                    "WebSocket disconnect error:",
+                    error
+                );
 
             }
 
-        });
+        }
 
-        // Receive Message Status Updates
-        stompClient.subscribe('/user/queue/status', function(message){
 
-            console.log("Message Status : " + message.body);
+        /*
+         * Remove JWT
+         */
 
-        });
+        localStorage.removeItem(
+            "token"
+        );
 
-    });
 
-}
+        /*
+         * Clear session
+         */
 
-function sendTyping(isTyping){
+        sessionStorage.clear();
 
-	let receiver = currentChatUser;
 
-	if(receiver === ""){
-	    return;
-	}
+        /*
+         * Go to login
+         */
 
-    stompClient.send("/app/typing",{},JSON.stringify({
+        window.location.replace(
+            "/login.html"
+        );
 
-        receiver:receiver,
-
-        typing:isTyping
-
-    }));
-
-}
-
-function sendMessage() {
-
-	let receiver = currentChatUser;
-
-	if(receiver === ""){
-	    alert("Please select a user");
-	    return;
-	}
-    let content = document.getElementById("message").value;
-
-    stompClient.send("/app/send", {}, JSON.stringify({
-        receiver: receiver,
-        content: content
-    }));
-
-}
-
-function markAsRead(){
-
-    if(currentChatUser === ""){
-        return;
     }
 
-    stompClient.send("/app/read", {}, JSON.stringify({
 
-        sender: currentChatUser
+    /* =====================================================
+       CHECK LOGIN
+    ===================================================== */
 
-    }));
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-}
+            const token =
+                localStorage.getItem(
+                    "token"
+                );
 
 
+            if (!token) {
 
-let timer;
+                window.location.replace(
+                    "/login.html"
+                );
 
-document.getElementById("message").addEventListener("input", function () {
+                return;
 
-    sendTyping(true);
+            }
 
-    clearTimeout(timer);
 
-    timer = setTimeout(function () {
+            console.log(
+                "Chat application started"
+            );
 
-        sendTyping(false);
-
-    }, 1000);
-
-});
-
-function loadUsers() {
-
-    console.log("Loading users...");
-
-    let token = localStorage.getItem("token");
-
-    fetch("/user/all", {
-        headers: {
-            "Authorization": "Bearer " + token
         }
-    })
-    .then(response => {
-        console.log("Status:", response.status);
-        return response.json();
-    })
-    .then(users => {
+    );
 
-        console.log(users);
-
-        let usersDiv = document.getElementById("users");
-
-        usersDiv.innerHTML = "<h3>Users</h3>";
-
-        users.forEach(user => {
-
-            usersDiv.innerHTML += `
-                <div onclick="selectUser('${user.username}')"
-                     style="padding:10px;border-bottom:1px solid #ddd;cursor:pointer;">
-                    👤 ${user.username}
-                </div>
-            `;
-        });
-
-    })
-    .catch(error => {
-        console.error(error);
-    });
-}
-function selectUser(username){
-
-    currentChatUser = username;
-
-    document.getElementById("chatWith").innerHTML =
-        "Chat with " + username;
-
-    loadConversation(username);
-
-    markAsRead();
-
-}
-
-function loadConversation(receiver){
-
-    let token = localStorage.getItem("token");
-
-    fetch("/messages/conversation?receiver=" + receiver, {
-
-        headers:{
-            "Authorization":"Bearer " + token
-        }
-
-    })
-    .then(response => response.json())
-    .then(messages => {
-
-        let chat = document.getElementById("chat");
-
-        chat.innerHTML = "";
-
-        messages.forEach(message => {
-
-        	chat.innerHTML += `
-        		<div id="message-${message.id}"
-        	     style="margin-bottom:10px; border:1px solid #ccc; padding:5px;">
-        	        <b>${message.sender}</b> :
-        	        ${message.content}
-
-        	        <br>
-
-        	        <small>${message.status}</small>
-
-        	        <br>
-
-        	        <button onclick="deleteMessage(${message.id})">
-        	            Delete For Me
-        	        </button>
-
-        	    </div>
-        	`;
-
-        });
-
-    });
-
-}
-
-function deleteMessage(messageId){
-
-    let token = localStorage.getItem("token");
-
-    fetch("/messages/delete/" + messageId,{
-
-        method:"DELETE",
-
-        headers:{
-            "Authorization":"Bearer " + token
-        }
-
-    })
-    .then(response=>response.text())
-    .then(data => {
-
-        document.getElementById("message-" + messageId).remove();
-
-    });
-
-}
-// Trigger READ when receiver changes
-//document.getElementById("receiver").addEventListener("change", function(){
-
-//    markAsRead();
-
-//});
-connect();
-loadUsers();
 </script>
 
+
 </body>
+
 </html>

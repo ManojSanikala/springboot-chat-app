@@ -5,6 +5,9 @@ public class ChatMessage {
 	private String sender;
 	private String receiver;
 	private String content;
+	private Long replyToMessageId;
+
+	private String replyToContent;
 	
 	public ChatMessage() {
     }
@@ -39,5 +42,20 @@ public class ChatMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+    public Long getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
+    public void setReplyToMessageId(Long replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
+    }
+
+    public String getReplyToContent() {
+        return replyToContent;
+    }
+
+    public void setReplyToContent(String replyToContent) {
+        this.replyToContent = replyToContent;
     }
 }

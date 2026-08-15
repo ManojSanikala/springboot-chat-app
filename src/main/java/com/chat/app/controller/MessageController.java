@@ -41,16 +41,44 @@ public class MessageController {
 
     @GetMapping("/conversation")
     public ResponseEntity<List<ChatHistoryResponse>> getConversation(
-            @RequestParam String receiver,
+            @RequestParam("receiver") String receiver,
             Principal principal) {
 
-    	String sender = principal.getName();
+        System.out.println("=================================");
+        System.out.println("CONVERSATION API CALLED");
+        System.out.println("LOGGED USER : " +
+                (principal != null
+                    ? principal.getName()
+                    : "NULL"));
+
+        System.out.println("RECEIVER : " + receiver);
+        System.out.println("=================================");
+
+
+        if (principal == null) {
+
+            return ResponseEntity.status(401).build();
+        }
+
+
+        String sender = principal.getName();
+
+
         List<ChatHistoryResponse> conversation =
-                messageService.getConversation(sender, receiver);
+                messageService.getConversation(
+                        sender,
+                        receiver
+                );
+
+
+        System.out.println(
+                "HISTORY SIZE : " +
+                conversation.size()
+        );
+
 
         return ResponseEntity.ok(conversation);
     }
-    
     @GetMapping("/all")
     public ResponseEntity<List<Message>> getMessages() {
 

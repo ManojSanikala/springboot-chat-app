@@ -1,5 +1,6 @@
 package com.chat.app.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +41,18 @@ public class UserController {
 	    return ResponseEntity.ok(user);
 	}
 	
+	/*
+	 * =====================================================
+	 * Get All Users
+	 * Returns all users except the logged-in user along with
+	 * unread message count.
+	 * =====================================================
+	 */
 	@GetMapping("/all")
-	public ResponseEntity<List<UserResponse>> getAllUsers(){
-		List <UserResponse> users = userService.getAllUsers();
-		return ResponseEntity.ok(users);
+	public List<UserResponse> getAllUsers(Principal principal) {
+
+	    return userService.getAllUsers(principal.getName());
+
 	}
 	
 	@DeleteMapping("/leave/{name}")

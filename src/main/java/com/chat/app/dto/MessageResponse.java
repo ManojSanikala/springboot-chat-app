@@ -2,11 +2,13 @@ package com.chat.app.dto;
 
 import com.chat.app.enums.MessageStatus;
 
-public class ChatHistoryResponse {
+public class MessageResponse {
 
     private Long id;
 
     private String sender;
+
+    private String receiver;
 
     private String content;
 
@@ -15,19 +17,20 @@ public class ChatHistoryResponse {
     private MessageStatus status;
 
     private boolean edited;
-
+    
     private Long replyToMessageId;
 
     private String replyToContent;
 
 
-    public ChatHistoryResponse() {
+    public MessageResponse() {
     }
 
 
-    public ChatHistoryResponse(
+    public MessageResponse(
             Long id,
             String sender,
+            String receiver,
             String content,
             String timestamp,
             MessageStatus status,
@@ -37,6 +40,7 @@ public class ChatHistoryResponse {
 
         this.id = id;
         this.sender = sender;
+        this.receiver = receiver;
         this.content = content;
         this.timestamp = timestamp;
         this.status = status;
@@ -61,6 +65,15 @@ public class ChatHistoryResponse {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
     }
 
 
@@ -98,8 +111,7 @@ public class ChatHistoryResponse {
     public void setEdited(boolean edited) {
         this.edited = edited;
     }
-
-
+    
     public Long getReplyToMessageId() {
         return replyToMessageId;
     }
@@ -107,7 +119,6 @@ public class ChatHistoryResponse {
     public void setReplyToMessageId(Long replyToMessageId) {
         this.replyToMessageId = replyToMessageId;
     }
-
 
     public String getReplyToContent() {
         return replyToContent;

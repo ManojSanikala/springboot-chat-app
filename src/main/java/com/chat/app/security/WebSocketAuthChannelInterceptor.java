@@ -11,71 +11,66 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.chat.app.model.User;
-import com.chat.app.repository.UserRepository;
 import com.chat.app.service.UserService;
 
-
-
 @Component
-public class WebSocketAuthChannelInterceptor implements ChannelInterceptor{
+public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 
-	
-	@Autowired
-	private JwtService jwtService;
+    @Autowired
+    private JwtService jwtService;
 
-	@Autowired
-	private CustomUserDetailsService customUserDetailsService;
-	
-	@Autowired
-	private UserRepository userRepository;
-	
-	@Autowired
-	private UserService userService;
-	
-	@Override
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private UserService userService;
+
+    @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
 
-		
-		StompHeaderAccessor accessor = 
-				MessageHeaderAccessor.getAccessor(message,StompHeaderAccessor.class);
-		
+        StompHeaderAccessor accessor =
+                MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-		
-		if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+        // User connects to WebSocket
+        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
 
-		    String authHeader = accessor.getFirstNativeHeader("Authorization");
+            String authHeader = accessor.getFirstNativeHeader("Authorization");
 
-		    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-		        String token = authHeader.substring(7);
+                String token = authHeader.substring(7);
 
-		        String username = jwtService.extractUsername(token);
+                String username = jwtService.extractUsername(token);
 
-		        UserDetails userDetails =
-		                customUserDetailsService.loadUserByUsername(username);
+                UserDetails userDetails =
+                        customUserDetailsService.loadUserByUsername(username);
 
-		        UsernamePasswordAuthenticationToken authentication =
-		                new UsernamePasswordAuthenticationToken(
-		                        userDetails,
-		                        null,
-		                        userDetails.getAuthorities()
-		                );
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-		        accessor.setUser(authentication);
+                accessor.setUser(authentication);
 
-		        userService.updateOnlineStatus(username, true);
-		    }
-		}
-		if (accessor != null && StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                // Update user online in database
+                userService.updateOnlineStatus(username, true);
+            }
+        }
 
-		    if (accessor.getUser() != null) {
+        // User disconnects
+        if (accessor != null && StompCommand.DISCONNECT.equals(accessor.getCommand())) {
 
-		        String username = accessor.getUser().getName();
+            if (accessor.getUser() != null) {
 
-		        userService.updateOfflineStatus(username);
-		    }
-		}
+                String username = accessor.getUser().getName();
+
+                // Update user offline in database
+                userService.updateOfflineStatus(username);
+            }
+        }
+
         return message;
     }
 }

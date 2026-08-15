@@ -30,7 +30,7 @@ public class User {
 	@OneToMany(mappedBy = "sender") // The user field inside Message owns this relationship.
 	private List<Message> sentMessages;
 	
-	private boolean online;
+	private boolean online = false;
 	
 	private String lastSeen;
 
