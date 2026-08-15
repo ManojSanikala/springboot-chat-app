@@ -3770,3 +3770,349 @@ function previousSearchResult() {
     scrollToSearchResult();
 
 }
+
+/* =====================================================
+   IMAGE UPLOAD
+===================================================== */
+
+function uploadImage() {
+
+    const input =
+        document.getElementById(
+            "imageInput"
+        );
+
+
+    if (!input) {
+
+        console.error(
+            "imageInput not found"
+        );
+
+        return;
+    }
+
+
+    const file =
+        input.files[0];
+
+
+    if (!file) {
+
+        return;
+    }
+
+
+    /*
+     * Make sure a chat is selected
+     */
+
+    if (!currentChatUser) {
+
+        alert(
+            "Please select a user first."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /*
+     * Image validation
+     */
+
+    if (
+        !file.type.startsWith(
+            "image/"
+        )
+    ) {
+
+        alert(
+            "Please select an image."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /*
+     * Maximum 5 MB
+     */
+
+    if (
+        file.size >
+        5 * 1024 * 1024
+    ) {
+
+        alert(
+            "Image must be less than 5 MB."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    const token =
+        localStorage.getItem(
+            "token"
+        );
+
+
+    if (!token) {
+
+        alert(
+            "Session expired. Please login again."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /*
+     * FormData
+     */
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "file",
+        file
+    );
+
+
+    /*
+     * Upload
+     */
+
+    fetch(
+        "/messages/upload-image",
+        {
+
+            method:
+                "POST",
+
+            headers: {
+
+                "Authorization":
+                    "Bearer " +
+                    token
+
+            },
+
+            body:
+                formData
+
+        }
+    )
+
+    .then(
+        async function (response) {
+
+            const text =
+                await response.text();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    text ||
+                    "Image upload failed"
+                );
+
+            }
+
+
+            return JSON.parse(
+                text
+            );
+
+        }
+    )
+
+    .then(
+        function (data) {
+
+            console.log(
+                "IMAGE UPLOAD SUCCESS:",
+                data
+            );
+
+
+            /*
+             * Send image through
+             * WebSocket.
+             */
+
+            sendImageMessage(
+                data.fileUrl
+            );
+
+
+            /*
+             * Clear file input.
+             */
+
+            input.value =
+                "";
+
+        }
+    )
+
+    .catch(
+        function (error) {
+
+            console.error(
+                "IMAGE UPLOAD ERROR:",
+                error
+            );
+
+
+            alert(
+                "Image upload failed: " +
+                error.message
+            );
+
+
+            input.value =
+                "";
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   ATTACHMENT MENU
+===================================================== */
+
+function toggleAttachmentMenu() {
+
+    const menu =
+        document.getElementById(
+            "attachmentMenu"
+        );
+
+    if (!menu) {
+
+        return;
+    }
+
+
+    if (
+        menu.style.display ===
+        "block"
+    ) {
+
+        menu.style.display =
+            "none";
+
+    }
+    else {
+
+        menu.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =====================================================
+   CLOSE ATTACHMENT MENU
+===================================================== */
+
+function closeAttachmentMenu() {
+
+    const menu =
+        document.getElementById(
+            "attachmentMenu"
+        );
+
+    if (menu) {
+
+        menu.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =====================================================
+   CLOSE ATTACHMENT MENU
+   WHEN CLICKING OUTSIDE
+===================================================== */
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        const menu =
+            document.getElementById(
+                "attachmentMenu"
+            );
+
+        const button =
+            document.getElementById(
+                "attachmentButton"
+            );
+
+
+        if (!menu || !button) {
+
+            return;
+        }
+
+
+        if (
+            menu.contains(
+                event.target
+            )
+        ) {
+
+            return;
+        }
+
+
+        if (
+            button.contains(
+                event.target
+            )
+        ) {
+
+            return;
+        }
+
+
+        menu.style.display =
+            "none";
+
+    }
+);
+
+
+/* =====================================================
+   VOICE MESSAGE
+   -----------------------------------------------------
+   UI placeholder for now.
+   Actual recording will be added later.
+===================================================== */
+
+function startVoiceRecording() {
+
+    alert(
+        "Voice recording will be added next."
+    );
+
+}

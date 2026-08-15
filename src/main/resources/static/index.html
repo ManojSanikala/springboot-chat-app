@@ -877,40 +877,441 @@
 
         </div>
 
+		<!-- =====================================================
+     CHAT INPUT PANEL
+===================================================== -->
 
-        <!-- =================================================
-             MESSAGE INPUT
-        ================================================== -->
+<div
+    id="chatInputWrapper"
+    style="
+        position:relative;
+        width:100%;
+        margin-top:10px;
+    "
+>
 
-        <div class="message-input-area">
+    <!-- ================= ATTACHMENT MENU ================= -->
 
-            <input
-                id="message"
-                type="text"
-                placeholder="Type a message..."
-                autocomplete="off"
+    <div
+        id="attachmentMenu"
+        style="
+            display:none;
+
+            position:absolute;
+
+            left:0;
+            bottom:58px;
+
+            width:190px;
+
+            background:white;
+
+            border:1px solid #ddd;
+
+            border-radius:12px;
+
+            box-shadow:
+                0 5px 20px
+                rgba(0,0,0,.18);
+
+            padding:6px;
+
+            z-index:1000;
+        "
+    >
+
+        <!-- IMAGE -->
+
+        <button
+            type="button"
+
+            onclick="
+                document
+                    .getElementById('imageInput')
+                    .click();
+
+                closeAttachmentMenu();
+            "
+
+            style="
+                width:100%;
+
+                display:flex;
+                align-items:center;
+
+                gap:12px;
+
+                padding:11px;
+
+                border:none;
+
+                background:white;
+
+                border-radius:8px;
+
+                cursor:pointer;
+
+                text-align:left;
+
+                font-size:14px;
+            "
+        >
+
+            <span
+                style="
+                    font-size:20px;
+                "
             >
+                🖼️
+            </span>
+
+            <span>
+                Image
+            </span>
+
+        </button>
 
 
-            <button
-                type="button"
-                class="send-button"
-                onclick="sendMessage()"
-                title="Send message"
+        <!-- DOCUMENT -->
+
+        <button
+            type="button"
+
+            onclick="
+                document
+                    .getElementById('documentInput')
+                    .click();
+
+                closeAttachmentMenu();
+            "
+
+            style="
+                width:100%;
+
+                display:flex;
+                align-items:center;
+
+                gap:12px;
+
+                padding:11px;
+
+                border:none;
+
+                background:white;
+
+                border-radius:8px;
+
+                cursor:pointer;
+
+                text-align:left;
+
+                font-size:14px;
+            "
+        >
+
+            <span
+                style="
+                    font-size:20px;
+                "
             >
+                📄
+            </span>
 
-                <i
-                    class="fa-solid fa-paper-plane">
-                </i>
+            <span>
+                Document
+            </span>
 
-            </button>
+        </button>
 
-        </div>
+
+        <!-- FILE -->
+
+        <button
+            type="button"
+
+            onclick="
+                document
+                    .getElementById('fileInput')
+                    .click();
+
+                closeAttachmentMenu();
+            "
+
+            style="
+                width:100%;
+
+                display:flex;
+                align-items:center;
+
+                gap:12px;
+
+                padding:11px;
+
+                border:none;
+
+                background:white;
+
+                border-radius:8px;
+
+                cursor:pointer;
+
+                text-align:left;
+
+                font-size:14px;
+            "
+        >
+
+            <span
+                style="
+                    font-size:20px;
+                "
+            >
+                📎
+            </span>
+
+            <span>
+                File
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         HIDDEN FILE INPUTS
+    ================================================= -->
+
+    <input
+        type="file"
+
+        id="imageInput"
+
+        accept="image/*"
+
+        style="
+            display:none;
+        "
+    >
+
+
+    <input
+        type="file"
+
+        id="documentInput"
+
+        accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx"
+
+        style="
+            display:none;
+        "
+    >
+
+
+    <input
+        type="file"
+
+        id="fileInput"
+
+        style="
+            display:none;
+        "
+    >
+
+
+    <!-- =================================================
+         MESSAGE INPUT ROW
+    ================================================= -->
+
+    <div
+        id="messageInputRow"
+
+        style="
+            display:flex;
+
+            align-items:center;
+
+            gap:7px;
+
+            width:100%;
+
+            padding:7px;
+
+            background:#ffffff;
+
+            border:1px solid #ddd;
+
+            border-radius:25px;
+
+            box-sizing:border-box;
+        "
+    >
+
+
+        <!-- ================= PLUS BUTTON ================= -->
+
+        <button
+            id="attachmentButton"
+
+            type="button"
+
+            onclick="toggleAttachmentMenu()"
+
+            title="Attachments"
+
+            style="
+                width:40px;
+
+                height:40px;
+
+                min-width:40px;
+
+                border:none;
+
+                border-radius:50%;
+
+                background:#f1f3f5;
+
+                color:#555;
+
+                cursor:pointer;
+
+                font-size:22px;
+
+                display:flex;
+
+                align-items:center;
+
+                justify-content:center;
+
+                transition:.2s;
+            "
+        >
+
+            +
+
+        </button>
+
+
+        <!-- ================= MESSAGE INPUT ================= -->
+
+        <input
+            id="message"
+
+            type="text"
+
+            placeholder="Type a message..."
+
+            autocomplete="off"
+
+            style="
+                flex:1;
+
+                min-width:0;
+
+                border:none;
+
+                outline:none;
+
+                background:transparent;
+
+                padding:10px 5px;
+
+                font-size:14px;
+            "
+        >
+
+
+        <!-- ================= MICROPHONE ================= -->
+
+        <button
+            id="micButton"
+
+            type="button"
+
+            title="Voice message"
+
+            onclick="startVoiceRecording()"
+
+            style="
+                width:40px;
+
+                height:40px;
+
+                min-width:40px;
+
+                border:none;
+
+                border-radius:50%;
+
+                background:transparent;
+
+                color:#555;
+
+                cursor:pointer;
+
+                font-size:18px;
+
+                display:flex;
+
+                align-items:center;
+
+                justify-content:center;
+            "
+        >
+
+            🎤
+
+        </button>
+
+
+        <!-- ================= SEND ================= -->
+
+        <button
+            id="sendButton"
+
+            class="send-button"
+
+            type="button"
+
+            onclick="sendMessage()"
+
+            title="Send message"
+
+            style="
+                width:42px;
+
+                height:42px;
+
+                min-width:42px;
+
+                border:none;
+
+                border-radius:50%;
+
+                background:#2196F3;
+
+                color:white;
+
+                cursor:pointer;
+
+                font-size:16px;
+
+                display:flex;
+
+                align-items:center;
+
+                justify-content:center;
+            "
+        >
+
+            ➤
+
+        </button>
 
     </div>
 
 </div>
-
 
 <!-- =====================================================
      JAVASCRIPT FILES
