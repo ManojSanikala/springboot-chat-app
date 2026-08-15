@@ -726,6 +726,84 @@
                     Select User
                 </h3>
 
+			
+				<!-- ================= MESSAGE SEARCH ================= -->
+
+<div
+    id="messageSearchBar"
+    style="
+        display:none;
+        margin:8px 0;
+        position:relative;
+    "
+>
+
+    <input
+        id="messageSearchInput"
+        type="text"
+        placeholder="Search messages..."
+        autocomplete="off"
+
+        style="
+            width:100%;
+            padding:10px 40px 10px 12px;
+
+            border:1px solid #ddd;
+            border-radius:8px;
+
+            outline:none;
+            font-size:13px;
+
+            box-sizing:border-box;
+        "
+    >
+
+    <button
+        type="button"
+        onclick="closeMessageSearch()"
+
+        style="
+            position:absolute;
+            right:8px;
+            top:50%;
+            transform:translateY(-50%);
+
+            border:none;
+            background:transparent;
+
+            cursor:pointer;
+
+            color:#777;
+            font-size:16px;
+        "
+    >
+        ✕
+    </button>
+
+</div>
+
+<button
+    id="openSearchButton"
+    type="button"
+    onclick="openMessageSearch()"
+
+    style="
+        border:none;
+        background:transparent;
+
+        cursor:pointer;
+
+        color:#555;
+        font-size:18px;
+
+        float:right;
+        margin-top:-38px;
+    "
+
+    title="Search messages"
+>
+    🔍
+</button>
 
                 <div id="typing"></div>
 

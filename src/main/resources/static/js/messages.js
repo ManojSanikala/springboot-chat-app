@@ -28,6 +28,8 @@
 let messageStore = {};
 
 let editingMessageId = null;
+let userIsNearBottom = true;
+let newMessageCount = 0;
 
 
 /* =====================================================
@@ -584,6 +586,9 @@ function appendMessage(
     message
 ) {
 
+	const wasNearBottom =
+    isChatNearBottom();
+    
     const chat =
         document.getElementById(
             "chat"
@@ -1005,32 +1010,29 @@ function appendMessage(
 
 
             <div
-                id="menu-${message.id}"
+    id="menu-${message.id}"
 
-                style="
-                    display:none;
-                    position:absolute;
-                    right:0;
-                    bottom:32px;
+    style="
+        display:none;
+        position:fixed;
+        width:180px;
+        max-width:calc(100vw - 30px);
 
-                    width:180px;
-                    max-width:calc(100vw - 40px);
+        background:#ffffff;
 
-                    background:#ffffff;
+        border:1px solid #ddd;
 
-                    border:1px solid #ddd;
+        border-radius:8px;
 
-                    border-radius:8px;
+        box-shadow:
+            0 4px 15px
+            rgba(0,0,0,.25);
 
-                    box-shadow:
-                        0 3px 12px
-                        rgba(0,0,0,.20);
+        overflow:hidden;
 
-                    overflow:hidden;
-
-                    z-index:99999;
-                "
-            >
+        z-index:999999;
+    "
+>
 
                 <!-- REPLY: BOTH -->
 
@@ -1351,8 +1353,18 @@ function appendMessage(
      * Keep latest message visible
      */
 
-    chat.scrollTop =
-        chat.scrollHeight;
+    if (wasNearBottom) {
+
+    scrollChatToBottom();
+
+}
+else {
+
+    newMessageCount++;
+
+    showNewMessageButton();
+
+}
 
 }
 
@@ -1429,80 +1441,219 @@ function closeAllMessageMenus() {
 
 /* =====================================================
    TOGGLE MESSAGE MENU
+   -----------------------------------------------------
+   Keeps the menu INSIDE the chat panel.
+   It will never overlap the Users panel.
 ===================================================== */
 
-function toggleMessageMenu(
-    messageId
-) {
+function toggleMessageMenu(messageId) {
 
     const menu =
         document.getElementById(
-            "menu-" +
-            messageId
+            "menu-" + messageId
         );
 
-
     if (!menu) {
-
         return;
+    }
 
+
+    const button =
+        event.currentTarget;
+
+    if (!button) {
+        return;
     }
 
 
     const isOpen =
-        menu.style.display ===
-        "block";
+        menu.style.display === "block";
 
+
+    /*
+     * Close all other menus
+     */
 
     closeAllMessageMenus();
 
 
-    if (!isOpen) {
+    /*
+     * If already open,
+     * simply close it.
+     */
 
-        menu.style.display =
-            "block";
+    if (isOpen) {
+        return;
+    }
+
+
+    /*
+     * Chat panel
+     */
+
+    const chat =
+        document.getElementById(
+            "chat"
+        );
+
+    if (!chat) {
+        return;
+    }
+
+
+    /*
+     * Get screen positions
+     */
+
+    const buttonRect =
+        button.getBoundingClientRect();
+
+    const chatRect =
+        chat.getBoundingClientRect();
+
+
+    /*
+     * Show temporarily to calculate size
+     */
+
+    menu.style.display =
+        "block";
+
+    menu.style.visibility =
+        "hidden";
+
+
+    const menuRect =
+        menu.getBoundingClientRect();
+
+
+    /*
+     * Chat boundaries
+     */
+
+    const chatLeft =
+        chatRect.left + 5;
+
+    const chatRight =
+        chatRect.right - 5;
+
+    const chatTop =
+        chatRect.top + 5;
+
+    const chatBottom =
+        chatRect.bottom - 5;
+
+
+    /*
+     * ================================
+     * HORIZONTAL POSITION
+     * ================================
+     */
+
+    let left =
+        buttonRect.right -
+        menuRect.width;
+
+
+    /*
+     * Never go into Users panel
+     */
+
+    if (
+        left <
+        chatLeft
+    ) {
+
+        left =
+            chatLeft;
 
     }
+
+
+    /*
+     * Never go outside chat panel
+     */
+
+    if (
+        left +
+        menuRect.width >
+        chatRight
+    ) {
+
+        left =
+            chatRight -
+            menuRect.width;
+
+    }
+
+
+    /*
+     * ================================
+     * VERTICAL POSITION
+     * ================================
+     */
+
+    let top =
+        buttonRect.bottom + 5;
+
+
+    /*
+     * If menu doesn't fit below,
+     * open above the button.
+     */
+
+    if (
+        top +
+        menuRect.height >
+        chatBottom
+    ) {
+
+        top =
+            buttonRect.top -
+            menuRect.height -
+            5;
+
+    }
+
+
+    /*
+     * If still above chat,
+     * keep it inside chat.
+     */
+
+    if (
+        top <
+        chatTop
+    ) {
+
+        top =
+            chatTop;
+
+    }
+
+
+    /*
+     * ================================
+     * APPLY POSITION
+     * ================================
+     */
+
+    menu.style.left =
+        left + "px";
+
+    menu.style.top =
+        top + "px";
+
+    menu.style.right =
+        "auto";
+
+    menu.style.bottom =
+        "auto";
+
+    menu.style.visibility =
+        "visible";
 
 }
-
-
-/* =====================================================
-   CLOSE MENU WHEN CLICKING OUTSIDE
-===================================================== */
-
-document.addEventListener(
-    "click",
-    function (event) {
-
-        if (
-            event.target.closest(
-                '[id^="menu-"]'
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            event.target.closest(
-                'button[onclick*="toggleMessageMenu"]'
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        closeAllMessageMenus();
-
-    }
-);
-
-
 /* =====================================================
    REPLY TO MESSAGE
    BOTH SENDER + RECEIVER
@@ -2740,5 +2891,882 @@ function updateDeletedMessage(
             "DELETED";
 
     }
+
+}
+
+/* =====================================================
+   CHAT AUTO-SCROLL
+===================================================== */
+
+function isChatNearBottom() {
+
+    const chat =
+        document.getElementById("chat");
+
+    if (!chat) {
+        return true;
+    }
+
+    const distanceFromBottom =
+        chat.scrollHeight -
+        chat.scrollTop -
+        chat.clientHeight;
+
+    return distanceFromBottom <= 80;
+}
+
+
+/* =====================================================
+   CHAT SCROLL LISTENER
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const chat =
+            document.getElementById("chat");
+
+        if (!chat) {
+            return;
+        }
+
+        chat.addEventListener(
+            "scroll",
+            function () {
+
+                userIsNearBottom =
+                    isChatNearBottom();
+
+                /*
+                 * If user reaches bottom,
+                 * remove new-message indicator.
+                 */
+
+                if (userIsNearBottom) {
+
+                    newMessageCount = 0;
+
+                    hideNewMessageButton();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =====================================================
+   SCROLL TO BOTTOM
+===================================================== */
+
+function scrollChatToBottom() {
+
+    const chat =
+        document.getElementById("chat");
+
+    if (!chat) {
+        return;
+    }
+
+    chat.scrollTo({
+
+        top:
+            chat.scrollHeight,
+
+        behavior:
+            "smooth"
+
+    });
+
+    userIsNearBottom = true;
+
+    newMessageCount = 0;
+
+    hideNewMessageButton();
+
+}
+
+
+/* =====================================================
+   NEW MESSAGE BUTTON
+===================================================== */
+
+function showNewMessageButton() {
+
+    let button =
+        document.getElementById(
+            "newMessageButton"
+        );
+
+    if (!button) {
+
+        button =
+            document.createElement(
+                "button"
+            );
+
+        button.id =
+            "newMessageButton";
+
+        button.type =
+            "button";
+
+        button.innerHTML =
+            "↓ New message";
+
+        button.style.cssText = `
+
+            position:absolute;
+
+            bottom:12px;
+
+            left:50%;
+
+            transform:translateX(-50%);
+
+            z-index:100;
+
+            border:none;
+
+            border-radius:20px;
+
+            padding:8px 16px;
+
+            background:#2196F3;
+
+            color:white;
+
+            font-size:13px;
+
+            font-weight:600;
+
+            cursor:pointer;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0,0,0,.25);
+
+        `;
+
+        button.onclick =
+            scrollChatToBottom;
+
+
+        /*
+         * Put button inside chat's
+         * parent so it stays with chat.
+         */
+
+        const chat =
+            document.getElementById(
+                "chat"
+            );
+
+        if (
+            chat &&
+            chat.parentElement
+        ) {
+
+            const parent =
+                chat.parentElement;
+
+            /*
+             * Make parent positioning
+             * context.
+             */
+
+            if (
+                getComputedStyle(
+                    parent
+                ).position ===
+                "static"
+            ) {
+
+                parent.style.position =
+                    "relative";
+
+            }
+
+            parent.appendChild(
+                button
+            );
+
+        }
+
+    }
+
+
+    button.style.display =
+        "block";
+
+
+    /*
+     * Show count when there are
+     * multiple new messages.
+     */
+
+    if (
+        newMessageCount > 1
+    ) {
+
+        button.innerHTML =
+            "↓ " +
+            newMessageCount +
+            " new messages";
+
+    }
+    else {
+
+        button.innerHTML =
+            "↓ New message";
+
+    }
+
+}
+
+
+/* =====================================================
+   HIDE NEW MESSAGE BUTTON
+===================================================== */
+
+function hideNewMessageButton() {
+
+    const button =
+        document.getElementById(
+            "newMessageButton"
+        );
+
+    if (button) {
+
+        button.style.display =
+            "none";
+
+    }
+
+}
+
+/* =====================================================
+   MESSAGE SEARCH
+   -----------------------------------------------------
+   Searches the currently loaded conversation.
+===================================================== */
+
+let messageSearchMatches = [];
+
+let messageSearchIndex = -1;
+
+
+/* =====================================================
+   OPEN SEARCH
+===================================================== */
+
+function openMessageSearch() {
+
+    const searchBar =
+        document.getElementById(
+            "messageSearchBar"
+        );
+
+    const input =
+        document.getElementById(
+            "messageSearchInput"
+        );
+
+    if (!searchBar || !input) {
+
+        console.error(
+            "Message search elements not found."
+        );
+
+        return;
+
+    }
+
+    searchBar.style.display =
+        "block";
+
+    input.value =
+        "";
+
+    input.focus();
+
+
+    input.oninput =
+        function () {
+
+            searchMessages(
+                input.value
+            );
+
+        };
+
+}
+
+
+/* =====================================================
+   CLOSE SEARCH
+===================================================== */
+
+function closeMessageSearch() {
+
+    const searchBar =
+        document.getElementById(
+            "messageSearchBar"
+        );
+
+    const input =
+        document.getElementById(
+            "messageSearchInput"
+        );
+
+
+    if (input) {
+
+        input.value =
+            "";
+
+    }
+
+
+    if (searchBar) {
+
+        searchBar.style.display =
+            "none";
+
+    }
+
+
+    clearSearchHighlights();
+
+
+    messageSearchMatches =
+        [];
+
+    messageSearchIndex =
+        -1;
+
+}
+
+
+/* =====================================================
+   SEARCH LOADED CONVERSATION
+===================================================== */
+
+function searchMessages(
+    searchText
+) {
+
+    clearSearchHighlights();
+
+
+    messageSearchMatches =
+        [];
+
+    messageSearchIndex =
+        -1;
+
+
+    const search =
+        searchText
+            .trim()
+            .toLowerCase();
+
+
+    if (!search) {
+
+        return;
+
+    }
+
+
+    /*
+     * Search directly inside
+     * messageStore.
+     *
+     * DO NOT check receiver here.
+     *
+     * Chat history was already loaded
+     * for the selected conversation.
+     */
+
+    Object.values(
+        messageStore
+    ).forEach(
+        function (message) {
+
+            if (!message) {
+
+                return;
+
+            }
+
+
+            const content =
+                String(
+                    message.content ||
+                    ""
+                );
+
+
+            if (
+                content
+                    .toLowerCase()
+                    .includes(search)
+            ) {
+
+                messageSearchMatches.push(
+                    message.id
+                );
+
+            }
+
+        }
+    );
+
+
+    console.log(
+        "================================="
+    );
+
+    console.log(
+        "SEARCH:",
+        search
+    );
+
+    console.log(
+        "MATCHES:",
+        messageSearchMatches
+    );
+
+    console.log(
+        "MATCH COUNT:",
+        messageSearchMatches.length
+    );
+
+    console.log(
+        "================================="
+    );
+
+
+    /*
+     * Nothing found
+     */
+
+    if (
+        messageSearchMatches.length ===
+        0
+    ) {
+
+        showSearchResultMessage(
+            "No messages found"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Show result count
+     */
+
+    showSearchResultMessage(
+
+        messageSearchMatches.length +
+        (
+            messageSearchMatches.length ===
+            1
+            ? " message found"
+            : " messages found"
+        )
+
+    );
+
+
+    /*
+     * First result
+     */
+
+    messageSearchIndex =
+        0;
+
+
+    scrollToSearchResult();
+
+}
+
+
+/* =====================================================
+   SHOW SEARCH RESULT COUNT
+===================================================== */
+
+function showSearchResultMessage(
+    text
+) {
+
+    let result =
+        document.getElementById(
+            "messageSearchResult"
+        );
+
+
+    if (!result) {
+
+        const searchBar =
+            document.getElementById(
+                "messageSearchBar"
+            );
+
+
+        if (!searchBar) {
+
+            return;
+
+        }
+
+
+        result =
+            document.createElement(
+                "div"
+            );
+
+
+        result.id =
+            "messageSearchResult";
+
+
+        result.style.cssText = `
+
+            margin-top:5px;
+
+            color:#777;
+
+            font-size:12px;
+
+        `;
+
+
+        searchBar.appendChild(
+            result
+        );
+
+    }
+
+
+    result.textContent =
+        text;
+
+}
+
+
+/* =====================================================
+   SCROLL TO SEARCH RESULT
+===================================================== */
+
+function scrollToSearchResult() {
+
+    if (
+        messageSearchMatches.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        messageSearchIndex < 0 ||
+        messageSearchIndex >=
+        messageSearchMatches.length
+    ) {
+
+        return;
+
+    }
+
+
+    clearSearchHighlights();
+
+
+    const messageId =
+        messageSearchMatches[
+            messageSearchIndex
+        ];
+
+
+    const messageElement =
+        document.getElementById(
+            "message-" +
+            messageId
+        );
+
+
+    if (!messageElement) {
+
+        console.error(
+            "Message element not found:",
+            messageId
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Scroll to message
+     */
+
+    messageElement.scrollIntoView({
+
+        behavior:
+            "smooth",
+
+        block:
+            "center"
+
+    });
+
+
+    /*
+     * Highlight entire message
+     */
+
+    messageElement.style.outline =
+        "2px solid #2196F3";
+
+
+    messageElement.style.borderRadius =
+        "10px";
+
+
+    /*
+     * Highlight matching text
+     */
+
+    highlightSearchText(
+        messageElement,
+        document
+            .getElementById(
+                "messageSearchInput"
+            )
+            ?.value || ""
+    );
+
+}
+
+
+/* =====================================================
+   HIGHLIGHT SEARCH TEXT
+===================================================== */
+
+function highlightSearchText(
+    messageElement,
+    searchText
+) {
+
+    const content =
+        messageElement.querySelector(
+            ".message-content"
+        );
+
+
+    if (!content) {
+
+        return;
+
+    }
+
+
+    const search =
+        searchText.trim();
+
+
+    if (!search) {
+
+        return;
+
+    }
+
+
+    /*
+     * Save original text once
+     */
+
+    if (
+        !content.dataset.originalText
+    ) {
+
+        content.dataset.originalText =
+            content.textContent;
+
+    }
+
+
+    const originalText =
+        content.dataset.originalText;
+
+
+    const escapedSearch =
+        search.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+        );
+
+
+    const regex =
+        new RegExp(
+            "(" +
+            escapedSearch +
+            ")",
+            "gi"
+        );
+
+
+    /*
+     * Don't use innerHTML directly
+     * with the user's search text.
+     */
+
+    const highlighted =
+        escapeHtml(
+            originalText
+        ).replace(
+
+            regex,
+
+            `<mark
+                style="
+                    background:#ffeb3b;
+                    color:#222;
+                    padding:1px 2px;
+                    border-radius:2px;
+                "
+            >$1</mark>`
+
+        );
+
+
+    content.innerHTML =
+        highlighted;
+
+}
+
+
+/* =====================================================
+   CLEAR SEARCH HIGHLIGHTS
+===================================================== */
+
+function clearSearchHighlights() {
+
+    document
+        .querySelectorAll(
+            '[id^="message-"]'
+        )
+        .forEach(
+            function (messageElement) {
+
+                messageElement.style.outline =
+                    "";
+
+                messageElement.style.borderRadius =
+                    "";
+
+
+                const content =
+                    messageElement.querySelector(
+                        ".message-content"
+                    );
+
+
+                if (
+                    content &&
+                    content.dataset.originalText
+                ) {
+
+                    content.textContent =
+                        content.dataset.originalText;
+
+
+                    delete content.dataset
+                        .originalText;
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   NEXT RESULT
+===================================================== */
+
+function nextSearchResult() {
+
+    if (
+        messageSearchMatches.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+    messageSearchIndex++;
+
+
+    if (
+        messageSearchIndex >=
+        messageSearchMatches.length
+    ) {
+
+        messageSearchIndex =
+            0;
+
+    }
+
+
+    scrollToSearchResult();
+
+}
+
+
+/* =====================================================
+   PREVIOUS RESULT
+===================================================== */
+
+function previousSearchResult() {
+
+    if (
+        messageSearchMatches.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+    messageSearchIndex--;
+
+
+    if (
+        messageSearchIndex < 0
+    ) {
+
+        messageSearchIndex =
+            messageSearchMatches.length - 1;
+
+    }
+
+
+    scrollToSearchResult();
 
 }
