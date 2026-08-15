@@ -642,6 +642,55 @@ function subscribeToTyping() {
 
 }
 
+/* =====================================================
+   SEND TYPING INDICATOR
+===================================================== */
+
+function sendTyping(isTyping) {
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        return;
+    }
+
+    if (
+        !currentChatUser
+    ) {
+
+        return;
+    }
+
+    const typingEvent = {
+
+        receiver:
+            currentChatUser,
+
+        typing:
+            isTyping
+
+    };
+
+    console.log(
+        "SENDING TYPING:",
+        typingEvent
+    );
+
+    stompClient.send(
+
+        "/app/typing",
+
+        {},
+
+        JSON.stringify(
+            typingEvent
+        )
+
+    );
+
+}
 
 /* =====================================================
    3. MESSAGE STATUS
