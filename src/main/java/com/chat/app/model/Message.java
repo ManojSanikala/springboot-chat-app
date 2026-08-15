@@ -15,127 +15,260 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "messages")
 public class Message {
-		@Id
-		@GeneratedValue(strategy = GenerationType.IDENTITY)
-		private Long id;
-		@ManyToOne
-		@JoinColumn(name = "sender_id")
-		private User sender;
 
-		@ManyToOne
-		@JoinColumn(name = "receiver_id")
-		private User receiver;
-	    private String content;
-	    private String timestamp;
-	    
-	    @Enumerated(EnumType.STRING)
-	    private MessageStatus status;
-	    
-	    private boolean deletedBySender = false;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	    private boolean deletedByReceiver = false;
-	    
-	    private boolean edited;
-	    
-	    private Long replyToMessageId;
+    @ManyToOne
+    @JoinColumn(name = "sender_id")
+    private User sender;
 
-	    private String replyToContent;
+    @ManyToOne
+    @JoinColumn(name = "receiver_id")
+    private User receiver;
 
-	    
-		public Message() {
-			super();
-		}
-		public Message(Long id, User sender, User receiver, String content,
-	               String timestamp, MessageStatus status,
-	               boolean deletedBySender,
-	               boolean deletedByReceiver) {
+    private String content;
 
-	    this.id = id;
-	    this.sender = sender;
-	    this.receiver = receiver;
-	    this.content = content;
-	    this.timestamp = timestamp;
-	    this.status = status;
-	    this.deletedBySender = deletedBySender;
-	    this.deletedByReceiver = deletedByReceiver;
-	}
-		public Long getId() {
-			return id;
-		}
-		public void setId(Long id) {
-			this.id = id;
-		}
-		public User getSender() {
-			return sender;
-		}
-		public void setSender(User sender) {
-			this.sender = sender;
-		}
-		public User getReceiver() {
-			return receiver;
-		}
-		public void setReceiver(User receiver) {
-			this.receiver = receiver;
-		}
-		public String getContent() {
-			return content;
-		}
-		public void setContent(String content) {
-			this.content = content;
-		}
-		public String getTimestamp() {
-			return timestamp;
-		}
-		public void setTimestamp(String timestamp) {
-			this.timestamp = timestamp;
-		}
-		
-		public MessageStatus getStatus() {
-		    return status;
-		}
+    private String timestamp;
 
-		public void setStatus(MessageStatus status) {
-		    this.status = status;
-		}
-		public boolean isDeletedBySender() {
-		    return deletedBySender;
-		}
+    @Enumerated(EnumType.STRING)
+    private MessageStatus status;
 
-		public void setDeletedBySender(boolean deletedBySender) {
-		    this.deletedBySender = deletedBySender;
-		}
+    private boolean deletedBySender = false;
 
-		public boolean isDeletedByReceiver() {
-		    return deletedByReceiver;
-		}
+    private boolean deletedByReceiver = false;
 
-		public void setDeletedByReceiver(boolean deletedByReceiver) {
-		    this.deletedByReceiver = deletedByReceiver;
-		}
-		
-		public boolean isEdited() {
-		    return edited;
-		}
+    private boolean edited;
 
-		public void setEdited(boolean edited) {
-		    this.edited = edited;
-		}
-		
-		public Long getReplyToMessageId() {
-		    return replyToMessageId;
-		}
+    private Long replyToMessageId;
 
-		public void setReplyToMessageId(Long replyToMessageId) {
-		    this.replyToMessageId = replyToMessageId;
-		}
+    private String replyToContent;
 
-		public String getReplyToContent() {
-		    return replyToContent;
-		}
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+     *
+     * TEXT      -> Normal text message
+     * IMAGE     -> Image message
+     * DOCUMENT  -> Document message
+     * FILE      -> Other file message
+     *
+     * Existing messages will remain TEXT.
+     */
+    private String messageType = "TEXT";
 
-		public void setReplyToContent(String replyToContent) {
-		    this.replyToContent = replyToContent;
-		}
-		
-	    
+
+    /*
+     * =====================================================
+     * CONSTRUCTORS
+     * =====================================================
+     */
+
+    public Message() {
+        super();
+    }
+
+
+    public Message(
+            Long id,
+            User sender,
+            User receiver,
+            String content,
+            String timestamp,
+            MessageStatus status,
+            boolean deletedBySender,
+            boolean deletedByReceiver) {
+
+        this.id = id;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.content = content;
+        this.timestamp = timestamp;
+        this.status = status;
+        this.deletedBySender = deletedBySender;
+        this.deletedByReceiver = deletedByReceiver;
+    }
+
+
+    /*
+     * =====================================================
+     * ID
+     * =====================================================
+     */
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    /*
+     * =====================================================
+     * SENDER
+     * =====================================================
+     */
+
+    public User getSender() {
+        return sender;
+    }
+
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+
+    /*
+     * =====================================================
+     * RECEIVER
+     * =====================================================
+     */
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+
+    /*
+     * =====================================================
+     * CONTENT
+     * =====================================================
+     */
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+
+    /*
+     * =====================================================
+     * TIMESTAMP
+     * =====================================================
+     */
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+
+    /*
+     * =====================================================
+     * MESSAGE STATUS
+     * =====================================================
+     */
+
+    public MessageStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MessageStatus status) {
+        this.status = status;
+    }
+
+
+    /*
+     * =====================================================
+     * DELETE BY SENDER
+     * =====================================================
+     */
+
+    public boolean isDeletedBySender() {
+        return deletedBySender;
+    }
+
+    public void setDeletedBySender(boolean deletedBySender) {
+        this.deletedBySender = deletedBySender;
+    }
+
+
+    /*
+     * =====================================================
+     * DELETE BY RECEIVER
+     * =====================================================
+     */
+
+    public boolean isDeletedByReceiver() {
+        return deletedByReceiver;
+    }
+
+    public void setDeletedByReceiver(boolean deletedByReceiver) {
+        this.deletedByReceiver = deletedByReceiver;
+    }
+
+
+    /*
+     * =====================================================
+     * EDITED
+     * =====================================================
+     */
+
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
+    }
+
+
+    /*
+     * =====================================================
+     * REPLY MESSAGE ID
+     * =====================================================
+     */
+
+    public Long getReplyToMessageId() {
+        return replyToMessageId;
+    }
+
+    public void setReplyToMessageId(Long replyToMessageId) {
+        this.replyToMessageId = replyToMessageId;
+    }
+
+
+    /*
+     * =====================================================
+     * REPLY CONTENT
+     * =====================================================
+     */
+
+    public String getReplyToContent() {
+        return replyToContent;
+    }
+
+    public void setReplyToContent(String replyToContent) {
+        this.replyToContent = replyToContent;
+    }
+
+
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+     */
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
+    }
+
 }

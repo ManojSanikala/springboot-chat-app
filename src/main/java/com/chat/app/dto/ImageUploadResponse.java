@@ -7,7 +7,9 @@ public class ImageUploadResponse {
     public ImageUploadResponse() {
     }
 
-    public ImageUploadResponse(String fileUrl) {
+    public ImageUploadResponse(
+            String fileUrl) {
+
         this.fileUrl = fileUrl;
     }
 
@@ -15,7 +17,9 @@ public class ImageUploadResponse {
         return fileUrl;
     }
 
-    public void setFileUrl(String fileUrl) {
+    public void setFileUrl(
+            String fileUrl) {
+
         this.fileUrl = fileUrl;
     }
 }

@@ -17,15 +17,39 @@ public class MessageResponse {
     private MessageStatus status;
 
     private boolean edited;
-    
+
     private Long replyToMessageId;
 
     private String replyToContent;
 
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+     *
+     * TEXT
+     * IMAGE
+     * DOCUMENT
+     * FILE
+     */
+    private String messageType = "TEXT";
+
+
+    /*
+     * =====================================================
+     * DEFAULT CONSTRUCTOR
+     * =====================================================
+     */
 
     public MessageResponse() {
     }
 
+
+    /*
+     * =====================================================
+     * CONSTRUCTOR
+     * =====================================================
+     */
 
     public MessageResponse(
             Long id,
@@ -36,7 +60,8 @@ public class MessageResponse {
             MessageStatus status,
             boolean edited,
             Long replyToMessageId,
-            String replyToContent) {
+            String replyToContent,
+            String messageType) {
 
         this.id = id;
         this.sender = sender;
@@ -47,8 +72,19 @@ public class MessageResponse {
         this.edited = edited;
         this.replyToMessageId = replyToMessageId;
         this.replyToContent = replyToContent;
+
+        this.messageType =
+                messageType != null
+                        ? messageType
+                        : "TEXT";
     }
 
+
+    /*
+     * =====================================================
+     * ID
+     * =====================================================
+     */
 
     public Long getId() {
         return id;
@@ -59,6 +95,12 @@ public class MessageResponse {
     }
 
 
+    /*
+     * =====================================================
+     * SENDER
+     * =====================================================
+     */
+
     public String getSender() {
         return sender;
     }
@@ -67,6 +109,12 @@ public class MessageResponse {
         this.sender = sender;
     }
 
+
+    /*
+     * =====================================================
+     * RECEIVER
+     * =====================================================
+     */
 
     public String getReceiver() {
         return receiver;
@@ -77,6 +125,12 @@ public class MessageResponse {
     }
 
 
+    /*
+     * =====================================================
+     * CONTENT
+     * =====================================================
+     */
+
     public String getContent() {
         return content;
     }
@@ -85,6 +139,12 @@ public class MessageResponse {
         this.content = content;
     }
 
+
+    /*
+     * =====================================================
+     * TIMESTAMP
+     * =====================================================
+     */
 
     public String getTimestamp() {
         return timestamp;
@@ -95,6 +155,12 @@ public class MessageResponse {
     }
 
 
+    /*
+     * =====================================================
+     * MESSAGE STATUS
+     * =====================================================
+     */
+
     public MessageStatus getStatus() {
         return status;
     }
@@ -104,6 +170,12 @@ public class MessageResponse {
     }
 
 
+    /*
+     * =====================================================
+     * EDITED
+     * =====================================================
+     */
+
     public boolean isEdited() {
         return edited;
     }
@@ -111,20 +183,61 @@ public class MessageResponse {
     public void setEdited(boolean edited) {
         this.edited = edited;
     }
-    
+
+
+    /*
+     * =====================================================
+     * REPLY MESSAGE ID
+     * =====================================================
+     */
+
     public Long getReplyToMessageId() {
         return replyToMessageId;
     }
 
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
+    public void setReplyToMessageId(
+            Long replyToMessageId) {
+
+        this.replyToMessageId =
+                replyToMessageId;
     }
+
+
+    /*
+     * =====================================================
+     * REPLY CONTENT
+     * =====================================================
+     */
 
     public String getReplyToContent() {
         return replyToContent;
     }
 
-    public void setReplyToContent(String replyToContent) {
-        this.replyToContent = replyToContent;
+    public void setReplyToContent(
+            String replyToContent) {
+
+        this.replyToContent =
+                replyToContent;
     }
+
+
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+ */
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(
+            String messageType) {
+
+        this.messageType =
+                messageType != null
+                        ? messageType
+                        : "TEXT";
+    }
+
 }

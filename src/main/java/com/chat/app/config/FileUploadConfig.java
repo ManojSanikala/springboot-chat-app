@@ -16,7 +16,7 @@ public class FileUploadConfig
 
         String uploadPath =
                 Paths.get(
-                        "uploads/images"
+                    "uploads/images"
                 )
                 .toAbsolutePath()
                 .toUri()
@@ -25,10 +25,10 @@ public class FileUploadConfig
 
         registry
             .addResourceHandler(
-                    "/uploads/images/**"
+                "/uploads/images/**"
             )
             .addResourceLocations(
-                    uploadPath
+                uploadPath
             );
 
     }

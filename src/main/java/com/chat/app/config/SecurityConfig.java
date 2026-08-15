@@ -76,6 +76,7 @@ public class SecurityConfig {
                     "/images/**",
                     "/favicon.ico",
 
+                    "/uploads/images/**",
                     "/auth/login",
 
                     "/chat/**"

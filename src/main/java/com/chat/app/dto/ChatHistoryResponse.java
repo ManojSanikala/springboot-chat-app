@@ -20,6 +20,18 @@ public class ChatHistoryResponse {
 
     private String replyToContent;
 
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+     *
+     * TEXT
+     * IMAGE
+     * DOCUMENT
+     * FILE
+     */
+    private String messageType = "TEXT";
+
 
     public ChatHistoryResponse() {
     }
@@ -33,7 +45,8 @@ public class ChatHistoryResponse {
             MessageStatus status,
             boolean edited,
             Long replyToMessageId,
-            String replyToContent) {
+            String replyToContent,
+            String messageType) {
 
         this.id = id;
         this.sender = sender;
@@ -43,6 +56,11 @@ public class ChatHistoryResponse {
         this.edited = edited;
         this.replyToMessageId = replyToMessageId;
         this.replyToContent = replyToContent;
+
+        this.messageType =
+                messageType != null
+                        ? messageType
+                        : "TEXT";
     }
 
 
@@ -104,8 +122,11 @@ public class ChatHistoryResponse {
         return replyToMessageId;
     }
 
-    public void setReplyToMessageId(Long replyToMessageId) {
-        this.replyToMessageId = replyToMessageId;
+    public void setReplyToMessageId(
+            Long replyToMessageId) {
+
+        this.replyToMessageId =
+                replyToMessageId;
     }
 
 
@@ -113,7 +134,31 @@ public class ChatHistoryResponse {
         return replyToContent;
     }
 
-    public void setReplyToContent(String replyToContent) {
-        this.replyToContent = replyToContent;
+    public void setReplyToContent(
+            String replyToContent) {
+
+        this.replyToContent =
+                replyToContent;
     }
+
+
+    /*
+     * =====================================================
+     * MESSAGE TYPE
+     * =====================================================
+     */
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(
+            String messageType) {
+
+        this.messageType =
+                messageType != null
+                        ? messageType
+                        : "TEXT";
+    }
+
 }

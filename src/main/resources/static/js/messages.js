@@ -31,139 +31,152 @@ let editingMessageId = null;
 let userIsNearBottom = true;
 let newMessageCount = 0;
 
-
+let selectedImageFile = null;
 /* =====================================================
    SEND MESSAGE
 ===================================================== */
 
 function sendMessage() {
 
-    const receiver =
-        currentChatUser;
+/*
+     * =========================================
+     * IMAGE SELECTED
+     * =========================================
+     */
 
+    if (selectedImageFile) {
 
-    if (!receiver) {
-
-        alert(
-            "Please select a user."
-        );
+        sendSelectedImage();
 
         return;
     }
 
-
-    if (
-        !stompClient ||
-        !stompClient.connected
-    ) {
-
-        alert(
-            "WebSocket is not connected."
-        );
-
-        return;
-    }
+	const receiver =
+		currentChatUser;
 
 
-    const input =
-        document.getElementById(
-            "message"
-        );
+	if (!receiver) {
+
+		alert(
+			"Please select a user."
+		);
+
+		return;
+	}
 
 
-    if (!input) {
+	if (
+		!stompClient ||
+		!stompClient.connected
+	) {
 
-        console.error(
-            "Message input not found."
-        );
+		alert(
+			"WebSocket is not connected."
+		);
 
-        return;
-    }
-
-
-    const content =
-        input.value.trim();
-
-
-    if (!content) {
-
-        return;
-    }
+		return;
+	}
 
 
-    /*
-     * Reply information
-     */
-
-    let replyToMessageId =
-        null;
-
-    let replyToContent =
-        null;
+	const input =
+		document.getElementById(
+			"message"
+		);
 
 
-    if (
-        replyingToMessage
-    ) {
+	if (!input) {
 
-        replyToMessageId =
-            replyingToMessage.messageId;
+		console.error(
+			"Message input not found."
+		);
 
-
-        replyToContent =
-            replyingToMessage.content;
-
-    }
+		return;
+	}
 
 
-    /*
-     * Send message
-     */
-
-    stompClient.send(
-
-        "/app/send",
-
-        {},
-
-        JSON.stringify({
-
-            receiver:
-                receiver,
-
-            content:
-                content,
-
-            replyToMessageId:
-                replyToMessageId,
-
-            replyToContent:
-                replyToContent
-
-        })
-
-    );
+	const content =
+		input.value.trim();
 
 
-    /*
-     * Clear input
-     */
+	if (!content) {
 
-    input.value = "";
-
-
-    /*
-     * Clear reply
-     */
-
-    cancelReply();
+		return;
+	}
 
 
-    /*
-     * Focus input
-     */
+	/*
+	 * Reply information
+	 */
 
-    input.focus();
+	let replyToMessageId =
+		null;
+
+	let replyToContent =
+		null;
+
+
+	if (
+		replyingToMessage
+	) {
+
+		replyToMessageId =
+			replyingToMessage.messageId;
+
+
+		replyToContent =
+			replyingToMessage.content;
+
+	}
+
+
+	/*
+	 * Send message
+	 */
+
+	stompClient.send(
+
+		"/app/send",
+
+		{},
+
+		JSON.stringify({
+
+			receiver:
+				receiver,
+
+			content:
+				content,
+
+			replyToMessageId:
+				replyToMessageId,
+
+			replyToContent:
+				replyToContent
+
+		})
+
+	);
+
+
+	/*
+	 * Clear input
+	 */
+
+	input.value = "";
+
+
+	/*
+	 * Clear reply
+	 */
+
+	cancelReply();
+
+
+	/*
+	 * Focus input
+	 */
+
+	input.focus();
 
 }
 
@@ -173,108 +186,117 @@ function sendMessage() {
 ===================================================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+	"DOMContentLoaded",
+	function() {
 
-        const input =
-            document.getElementById(
-                "message"
-            );
-
-
-        if (!input) {
-
-            return;
-        }
+		const input =
+			document.getElementById(
+				"message"
+			);
 
 
-        /*
-         * Enter = Send
-         */
+		if (!input) {
 
-        input.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key ===
-                    "Enter"
-                ) {
-
-                    event.preventDefault();
-
-                    /*
-                     * If editing, save edit.
-                     * Otherwise send new message.
-                     */
-
-                    if (
-                        editingMessageId !==
-                        null
-                    ) {
-
-                        saveEditedMessage();
-
-                    }
-                    else {
-
-                        sendMessage();
-
-                    }
-
-                }
-
-            }
-        );
+			return;
+		}
 
 
-        /*
-         * Typing indicator
-         */
+		/*
+		 * Enter = Send
+		 */
 
-        input.addEventListener(
-            "input",
-            function () {
+		input.addEventListener(
+			"keydown",
+			function(event) {
 
-                if (
-                    typeof sendTyping !==
-                    "function"
-                ) {
+				if (
+					event.key ===
+					"Enter"
+				) {
 
-                    return;
-                }
+					event.preventDefault();
+
+					/*
+					 * If editing, save edit.
+					 * Otherwise send new message.
+					 */
+
+					if (
+						editingMessageId !==
+						null
+					) {
+
+						saveEditedMessage();
+
+					}
+					else {
+
+						if (selectedImageFile) {
+
+							sendSelectedImage();
+
+						}
+						else {
+
+							sendMessage();
+
+						}
+
+					}
+
+				}
+
+			}
+		);
 
 
-                if (
-                    !currentChatUser
-                ) {
+		/*
+		 * Typing indicator
+		 */
 
-                    return;
-                }
+		input.addEventListener(
+			"input",
+			function() {
+
+				if (
+					typeof sendTyping !==
+					"function"
+				) {
+
+					return;
+				}
 
 
-                sendTyping(true);
+				if (
+					!currentChatUser
+				) {
+
+					return;
+				}
 
 
-                clearTimeout(
-                    typingTimer
-                );
+				sendTyping(true);
 
 
-                typingTimer =
-                    setTimeout(
-                        function () {
+				clearTimeout(
+					typingTimer
+				);
 
-                            sendTyping(false);
 
-                        },
-                        1000
-                    );
+				typingTimer =
+					setTimeout(
+						function() {
 
-            }
-        );
+							sendTyping(false);
 
-    }
+						},
+						1000
+					);
+
+			}
+		);
+
+	}
 );
 
 
@@ -283,187 +305,187 @@ document.addEventListener(
 ===================================================== */
 
 function loadConversation(
-    username
+	username
 ) {
 
-    console.log(
-        "================================="
-    );
+	console.log(
+		"================================="
+	);
 
-    console.log(
-        "Loading chat history for:",
-        username
-    );
+	console.log(
+		"Loading chat history for:",
+		username
+	);
 
-    console.log(
-        "================================="
-    );
-
-
-    const token =
-        localStorage.getItem(
-            "token"
-        );
+	console.log(
+		"================================="
+	);
 
 
-    if (!token) {
-
-        console.error(
-            "JWT token not found."
-        );
-
-        window.location.replace(
-            "/login.html"
-        );
-
-        return;
-    }
+	const token =
+		localStorage.getItem(
+			"token"
+		);
 
 
-    const url =
-        "/messages/conversation?receiver=" +
-        encodeURIComponent(
-            username
-        );
+	if (!token) {
+
+		console.error(
+			"JWT token not found."
+		);
+
+		window.location.replace(
+			"/login.html"
+		);
+
+		return;
+	}
 
 
-    fetch(
-        url,
-        {
-
-            method: "GET",
-
-            headers: {
-
-                "Authorization":
-                    "Bearer " + token,
-
-                "Content-Type":
-                    "application/json"
-
-            }
-
-        }
-    )
-
-    .then(
-        async function (response) {
-
-            console.log(
-                "History HTTP status:",
-                response.status
-            );
+	const url =
+		"/messages/conversation?receiver=" +
+		encodeURIComponent(
+			username
+		);
 
 
-            const text =
-                await response.text();
+	fetch(
+		url,
+		{
+
+			method: "GET",
+
+			headers: {
+
+				"Authorization":
+					"Bearer " + token,
+
+				"Content-Type":
+					"application/json"
+
+			}
+
+		}
+	)
+
+		.then(
+			async function(response) {
+
+				console.log(
+					"History HTTP status:",
+					response.status
+				);
 
 
-            if (!response.ok) {
-
-                console.error(
-                    "History response:",
-                    text
-                );
+				const text =
+					await response.text();
 
 
-                throw new Error(
-                    "Failed to load conversation. HTTP " +
-                    response.status
-                );
+				if (!response.ok) {
 
-            }
-
-
-            if (
-                !text.trim()
-            ) {
-
-                return [];
-
-            }
+					console.error(
+						"History response:",
+						text
+					);
 
 
-            try {
+					throw new Error(
+						"Failed to load conversation. HTTP " +
+						response.status
+					);
 
-                return JSON.parse(
-                    text
-                );
-
-            }
-            catch (error) {
-
-                console.error(
-                    "Invalid history JSON:",
-                    text
-                );
-
-                throw error;
-
-            }
-
-        }
-    )
-
-    .then(
-        function (messages) {
-
-            console.log(
-                "CHAT HISTORY RECEIVED:",
-                messages
-            );
+				}
 
 
-            const chat =
-                document.getElementById(
-                    "chat"
-                );
+				if (
+					!text.trim()
+				) {
+
+					return [];
+
+				}
 
 
-            if (!chat) {
+				try {
 
-                console.error(
-                    "#chat element not found."
-                );
+					return JSON.parse(
+						text
+					);
 
-                return;
-            }
+				}
+				catch (error) {
 
+					console.error(
+						"Invalid history JSON:",
+						text
+					);
 
-            /*
-             * Clear previous conversation
-             */
+					throw error;
 
-            chat.innerHTML = "";
+				}
 
+			}
+		)
 
-            /*
-             * Reset date separator
-             */
+		.then(
+			function(messages) {
 
-            lastDisplayedMessageDate =
-                null;
-
-
-            /*
-             * Clear message store
-             */
-
-            messageStore = {};
+				console.log(
+					"CHAT HISTORY RECEIVED:",
+					messages
+				);
 
 
-            /*
-             * No messages
-             */
+				const chat =
+					document.getElementById(
+						"chat"
+					);
 
-            if (
-                !Array.isArray(
-                    messages
-                ) ||
-                messages.length === 0
-            ) {
 
-                chat.innerHTML = `
+				if (!chat) {
+
+					console.error(
+						"#chat element not found."
+					);
+
+					return;
+				}
+
+
+				/*
+				 * Clear previous conversation
+				 */
+
+				chat.innerHTML = "";
+
+
+				/*
+				 * Reset date separator
+				 */
+
+				lastDisplayedMessageDate =
+					null;
+
+
+				/*
+				 * Clear message store
+				 */
+
+				messageStore = {};
+
+
+				/*
+				 * No messages
+				 */
+
+				if (
+					!Array.isArray(
+						messages
+					) ||
+					messages.length === 0
+				) {
+
+					chat.innerHTML = `
 
                     <div
                         style="
@@ -496,84 +518,84 @@ function loadConversation(
 
                 `;
 
-                markAsRead();
+					markAsRead();
 
-                return;
-            }
-
-
-            /*
-             * Render history
-             */
-
-            messages.forEach(
-                function (message) {
-
-                    /*
-                     * Store for:
-                     * Reply
-                     * Edit
-                     * Delete
-                     */
-
-                    messageStore[
-                        message.id
-                    ] = message;
+					return;
+				}
 
 
-                    appendMessage(
-                        message
-                    );
+				/*
+				 * Render history
+				 */
 
-                }
-            );
+				messages.forEach(
+					function(message) {
 
+						/*
+						 * Store for:
+						 * Reply
+						 * Edit
+						 * Delete
+						 */
 
-            /*
-             * Scroll bottom
-             */
-
-            chat.scrollTop =
-                chat.scrollHeight;
-
-
-            /*
-             * Mark incoming
-             * messages READ
-             */
-
-            markAsRead();
+						messageStore[
+							message.id
+						] = message;
 
 
-            console.log(
-                "HISTORY LOADED:",
-                messages.length
-            );
+						appendMessage(
+							message
+						);
 
-        }
-    )
+					}
+				);
 
-    .catch(
-        function (error) {
 
-            console.error(
-                "================================="
-            );
+				/*
+				 * Scroll bottom
+				 */
 
-            console.error(
-                "CHAT HISTORY ERROR"
-            );
+				chat.scrollTop =
+					chat.scrollHeight;
 
-            console.error(
-                error
-            );
 
-            console.error(
-                "================================="
-            );
+				/*
+				 * Mark incoming
+				 * messages READ
+				 */
 
-        }
-    );
+				markAsRead();
+
+
+				console.log(
+					"HISTORY LOADED:",
+					messages.length
+				);
+
+			}
+		)
+
+		.catch(
+			function(error) {
+
+				console.error(
+					"================================="
+				);
+
+				console.error(
+					"CHAT HISTORY ERROR"
+				);
+
+				console.error(
+					error
+				);
+
+				console.error(
+					"================================="
+				);
+
+			}
+		);
 
 }
 
@@ -583,140 +605,140 @@ function loadConversation(
 ===================================================== */
 
 function appendMessage(
-    message
+	message
 ) {
 
 	const wasNearBottom =
-    isChatNearBottom();
-    
-    const chat =
-        document.getElementById(
-            "chat"
-        );
+		isChatNearBottom();
+
+	const chat =
+		document.getElementById(
+			"chat"
+		);
 
 
-    if (!chat) {
+	if (!chat) {
 
-        console.error(
-            "#chat element not found."
-        );
+		console.error(
+			"#chat element not found."
+		);
 
-        return;
-    }
-
-
-    /*
-     * Store message
-     */
-
-    messageStore[
-        message.id
-    ] = message;
+		return;
+	}
 
 
-    /*
-     * Prevent duplicate
-     */
+	/*
+	 * Store message
+	 */
 
-    if (
-        document.getElementById(
-            "message-" +
-            message.id
-        )
-    ) {
-
-        return;
-    }
+	messageStore[
+		message.id
+	] = message;
 
 
-    /* =================================================
-       DATE SEPARATOR
-    ================================================= */
+	/*
+	 * Prevent duplicate
+	 */
 
-    if (
-        message.timestamp
-    ) {
+	if (
+		document.getElementById(
+			"message-" +
+			message.id
+		)
+	) {
 
-        const messageDate =
-            new Date(
-                message.timestamp
-            );
-
-
-        if (
-            !isNaN(
-                messageDate.getTime()
-            )
-        ) {
-
-            const dateKey =
-                messageDate.toDateString();
+		return;
+	}
 
 
-            if (
-                lastDisplayedMessageDate !==
-                dateKey
-            ) {
+	/* =================================================
+	   DATE SEPARATOR
+	================================================= */
 
-                const today =
-                    new Date();
+	if (
+		message.timestamp
+	) {
 
-
-                const yesterday =
-                    new Date();
-
-
-                yesterday.setDate(
-                    today.getDate() - 1
-                );
+		const messageDate =
+			new Date(
+				message.timestamp
+			);
 
 
-                let separatorText;
+		if (
+			!isNaN(
+				messageDate.getTime()
+			)
+		) {
+
+			const dateKey =
+				messageDate.toDateString();
 
 
-                if (
-                    messageDate.toDateString() ===
-                    today.toDateString()
-                ) {
+			if (
+				lastDisplayedMessageDate !==
+				dateKey
+			) {
 
-                    separatorText =
-                        "Today";
-
-                }
-
-                else if (
-                    messageDate.toDateString() ===
-                    yesterday.toDateString()
-                ) {
-
-                    separatorText =
-                        "Yesterday";
-
-                }
-
-                else {
-
-                    separatorText =
-                        messageDate.toLocaleDateString(
-                            [],
-                            {
-
-                                day:
-                                    "2-digit",
-
-                                month:
-                                    "long",
-
-                                year:
-                                    "numeric"
-
-                            }
-                        );
-
-                }
+				const today =
+					new Date();
 
 
-                chat.innerHTML += `
+				const yesterday =
+					new Date();
+
+
+				yesterday.setDate(
+					today.getDate() - 1
+				);
+
+
+				let separatorText;
+
+
+				if (
+					messageDate.toDateString() ===
+					today.toDateString()
+				) {
+
+					separatorText =
+						"Today";
+
+				}
+
+				else if (
+					messageDate.toDateString() ===
+					yesterday.toDateString()
+				) {
+
+					separatorText =
+						"Yesterday";
+
+				}
+
+				else {
+
+					separatorText =
+						messageDate.toLocaleDateString(
+							[],
+							{
+
+								day:
+									"2-digit",
+
+								month:
+									"long",
+
+								year:
+									"numeric"
+
+							}
+						);
+
+				}
+
+
+				chat.innerHTML += `
 
                     <div
                         style="
@@ -745,26 +767,26 @@ function appendMessage(
                 `;
 
 
-                lastDisplayedMessageDate =
-                    dateKey;
+				lastDisplayedMessageDate =
+					dateKey;
 
-            }
+			}
 
-        }
+		}
 
-    }
+	}
 
 
-    /* =================================================
-       DELETED MESSAGE
-    ================================================= */
+	/* =================================================
+	   DELETED MESSAGE
+	================================================= */
 
-    if (
-        message.status ===
-        "DELETED"
-    ) {
+	if (
+		message.status ===
+		"DELETED"
+	) {
 
-        chat.innerHTML += `
+		chat.innerHTML += `
 
             <div
                 id="message-${message.id}"
@@ -795,110 +817,110 @@ function appendMessage(
         `;
 
 
-        return;
-    }
+		return;
+	}
 
 
-    /* =================================================
-       SENDER / RECEIVER
-    ================================================= */
+	/* =================================================
+	   SENDER / RECEIVER
+	================================================= */
 
-    const isMyMessage =
-        message.sender ===
-        loggedInUser;
-
-
-    /* =================================================
-       TIMESTAMP
-    ================================================= */
-
-    let timeText =
-        "";
+	const isMyMessage =
+		message.sender ===
+		loggedInUser;
 
 
-    if (
-        message.timestamp
-    ) {
+	/* =================================================
+	   TIMESTAMP
+	================================================= */
 
-        const date =
-            new Date(
-                message.timestamp
-            );
+	let timeText =
+		"";
 
 
-        if (
-            !isNaN(
-                date.getTime()
-            )
-        ) {
+	if (
+		message.timestamp
+	) {
 
-            timeText =
-                date.toLocaleTimeString(
-                    [],
-                    {
-
-                        hour:
-                            "2-digit",
-
-                        minute:
-                            "2-digit"
-
-                    }
-                );
-
-        }
-
-    }
+		const date =
+			new Date(
+				message.timestamp
+			);
 
 
-    /* =================================================
-       STATUS
-       Sender only
-    ================================================= */
+		if (
+			!isNaN(
+				date.getTime()
+			)
+		) {
 
-    let statusHTML =
-        "";
+			timeText =
+				date.toLocaleTimeString(
+					[],
+					{
 
+						hour:
+							"2-digit",
 
-    if (
-        isMyMessage
-    ) {
+						minute:
+							"2-digit"
 
-        let statusIcon =
-            "✓";
+					}
+				);
 
+		}
 
-        let statusColor =
-            "#777";
-
-
-        if (
-            message.status ===
-            "DELIVERED"
-        ) {
-
-            statusIcon =
-                "✓✓";
-
-        }
+	}
 
 
-        if (
-            message.status ===
-            "READ"
-        ) {
+	/* =================================================
+	   STATUS
+	   Sender only
+	================================================= */
 
-            statusIcon =
-                "✓✓";
-
-
-            statusColor =
-                "#2196F3";
-
-        }
+	let statusHTML =
+		"";
 
 
-        statusHTML = `
+	if (
+		isMyMessage
+	) {
+
+		let statusIcon =
+			"✓";
+
+
+		let statusColor =
+			"#777";
+
+
+		if (
+			message.status ===
+			"DELIVERED"
+		) {
+
+			statusIcon =
+				"✓✓";
+
+		}
+
+
+		if (
+			message.status ===
+			"READ"
+		) {
+
+			statusIcon =
+				"✓✓";
+
+
+			statusColor =
+				"#2196F3";
+
+		}
+
+
+		statusHTML = `
 
             <span
                 id="status-${message.id}"
@@ -916,23 +938,23 @@ function appendMessage(
 
         `;
 
-    }
+	}
 
 
-    /* =================================================
-       REPLY PREVIEW INSIDE MESSAGE
-    ================================================= */
+	/* =================================================
+	   REPLY PREVIEW INSIDE MESSAGE
+	================================================= */
 
-    let replyHTML =
-        "";
+	let replyHTML =
+		"";
 
 
-    if (
-        message.replyToMessageId &&
-        message.replyToContent
-    ) {
+	if (
+		message.replyToMessageId &&
+		message.replyToContent
+	) {
 
-        replyHTML = `
+		replyHTML = `
 
             <div
                 style="
@@ -954,23 +976,23 @@ function appendMessage(
 
                 <span>
                     ${escapeHtml(
-                        message.replyToContent
-                    )}
+			message.replyToContent
+		)}
                 </span>
 
             </div>
 
         `;
 
-    }
+	}
 
 
-    /* =================================================
-       THREE DOT MENU
-       BOTH SENDER + RECEIVER
-    ================================================= */
+	/* =================================================
+	   THREE DOT MENU
+	   BOTH SENDER + RECEIVER
+	================================================= */
 
-    let menuHTML = `
+	let menuHTML = `
 
         <div
             style="
@@ -1064,11 +1086,10 @@ function appendMessage(
                 </button>
 
 
-                ${
-                    isMyMessage
-                    ?
+                ${isMyMessage
+			?
 
-                    `
+			`
 
                     <!-- EDIT: SENDER ONLY -->
 
@@ -1161,9 +1182,9 @@ function appendMessage(
 
                     `
 
-                    :
+			:
 
-                    `
+			`
 
                     <!-- RECEIVER -->
 
@@ -1196,7 +1217,7 @@ function appendMessage(
 
                     `
 
-                }
+		}
 
             </div>
 
@@ -1205,11 +1226,11 @@ function appendMessage(
     `;
 
 
-    /* =================================================
-       MESSAGE BUBBLE
-    ================================================= */
+	/* =================================================
+	   MESSAGE BUBBLE
+	================================================= */
 
-    chat.innerHTML += `
+	chat.innerHTML += `
 
         <div
             id="message-${message.id}"
@@ -1218,11 +1239,10 @@ function appendMessage(
                 display:flex;
 
                 justify-content:
-                    ${
-                        isMyMessage
-                        ? "flex-end"
-                        : "flex-start"
-                    };
+                    ${isMyMessage
+			? "flex-end"
+			: "flex-start"
+		};
 
                 width:100%;
 
@@ -1249,11 +1269,10 @@ function appendMessage(
                     border-radius:12px;
 
                     background:
-                        ${
-                            isMyMessage
-                            ? "#dcf8c6"
-                            : "#ffffff"
-                        };
+                        ${isMyMessage
+			? "#dcf8c6"
+			: "#ffffff"
+		};
 
                     border:1px solid #ddd;
 
@@ -1270,49 +1289,73 @@ function appendMessage(
 
                 <!-- MESSAGE CONTENT -->
 
-                <div
-                    class="message-content"
+             <div
+    class="message-content"
+    style="
+        line-height:1.4;
+        font-size:14px;
+    "
+>
 
-                    style="
-                        line-height:1.4;
-                        font-size:14px;
-                    "
-                >
+    ${message.messageType &&
+			message.messageType.toUpperCase() === "IMAGE"
 
-                    ${escapeHtml(
-                        message.content
-                    )}
+			?
 
-                    ${
-                        message.edited
-                        ?
+			`
+        <img
+            src="${escapeHtml(message.content)}"
+            alt="Image"
+            style="
+                display:block;
+                max-width:280px;
+                max-height:300px;
+                width:auto;
+                height:auto;
+                border-radius:10px;
+                object-fit:cover;
+                cursor:pointer;
+            "
+            onclick="
+                window.open(
+                    '${escapeHtml(message.content)}',
+                    '_blank'
+                );
+            "
+        />
+        `
 
-                        `
+			:
 
-                        <span
-                            class="edited-label"
+			escapeHtml(
+				message.content
+			)
+		}
 
-                            style="
-                                color:#777;
-                                font-size:10px;
-                                margin-left:5px;
-                                font-style:italic;
-                            "
-                        >
 
-                            (edited)
+    ${message.edited
+			?
 
-                        </span>
+			`
+        <span
+            class="edited-label"
+            style="
+                color:#777;
+                font-size:10px;
+                margin-left:5px;
+                font-style:italic;
+            "
+        >
+            (edited)
+        </span>
+        `
 
-                        `
+			:
 
-                        :
+			""
+		}
 
-                        ""
-                    }
-
-                </div>
-
+</div>
 
                 <!-- TIME / STATUS / MENU -->
 
@@ -1349,22 +1392,22 @@ function appendMessage(
     `;
 
 
-    /*
-     * Keep latest message visible
-     */
+	/*
+	 * Keep latest message visible
+	 */
 
-    if (wasNearBottom) {
+	if (wasNearBottom) {
 
-    scrollChatToBottom();
+		scrollChatToBottom();
 
-}
-else {
+	}
+	else {
 
-    newMessageCount++;
+		newMessageCount++;
 
-    showNewMessageButton();
+		showNewMessageButton();
 
-}
+	}
 
 }
 
@@ -1374,45 +1417,45 @@ else {
 ===================================================== */
 
 function escapeHtml(
-    value
+	value
 ) {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
+	if (
+		value === null ||
+		value === undefined
+	) {
 
-        return "";
+		return "";
 
-    }
+	}
 
 
-    return String(value)
+	return String(value)
 
-        .replace(
-            /&/g,
-            "&amp;"
-        )
+		.replace(
+			/&/g,
+			"&amp;"
+		)
 
-        .replace(
-            /</g,
-            "&lt;"
-        )
+		.replace(
+			/</g,
+			"&lt;"
+		)
 
-        .replace(
-            />/g,
-            "&gt;"
-        )
+		.replace(
+			/>/g,
+			"&gt;"
+		)
 
-        .replace(
-            /"/g,
-            "&quot;"
-        )
+		.replace(
+			/"/g,
+			"&quot;"
+		)
 
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+		.replace(
+			/'/g,
+			"&#039;"
+		);
 
 }
 
@@ -1423,18 +1466,18 @@ function escapeHtml(
 
 function closeAllMessageMenus() {
 
-    document
-        .querySelectorAll(
-            '[id^="menu-"]'
-        )
-        .forEach(
-            function (menu) {
+	document
+		.querySelectorAll(
+			'[id^="menu-"]'
+		)
+		.forEach(
+			function(menu) {
 
-                menu.style.display =
-                    "none";
+				menu.style.display =
+					"none";
 
-            }
-        );
+			}
+		);
 
 }
 
@@ -1448,210 +1491,210 @@ function closeAllMessageMenus() {
 
 function toggleMessageMenu(messageId) {
 
-    const menu =
-        document.getElementById(
-            "menu-" + messageId
-        );
+	const menu =
+		document.getElementById(
+			"menu-" + messageId
+		);
 
-    if (!menu) {
-        return;
-    }
+	if (!menu) {
+		return;
+	}
 
 
-    const button =
-        event.currentTarget;
+	const button =
+		event.currentTarget;
 
-    if (!button) {
-        return;
-    }
+	if (!button) {
+		return;
+	}
 
 
-    const isOpen =
-        menu.style.display === "block";
+	const isOpen =
+		menu.style.display === "block";
 
 
-    /*
-     * Close all other menus
-     */
+	/*
+	 * Close all other menus
+	 */
 
-    closeAllMessageMenus();
+	closeAllMessageMenus();
 
 
-    /*
-     * If already open,
-     * simply close it.
-     */
+	/*
+	 * If already open,
+	 * simply close it.
+	 */
 
-    if (isOpen) {
-        return;
-    }
+	if (isOpen) {
+		return;
+	}
 
 
-    /*
-     * Chat panel
-     */
+	/*
+	 * Chat panel
+	 */
 
-    const chat =
-        document.getElementById(
-            "chat"
-        );
+	const chat =
+		document.getElementById(
+			"chat"
+		);
 
-    if (!chat) {
-        return;
-    }
+	if (!chat) {
+		return;
+	}
 
 
-    /*
-     * Get screen positions
-     */
+	/*
+	 * Get screen positions
+	 */
 
-    const buttonRect =
-        button.getBoundingClientRect();
+	const buttonRect =
+		button.getBoundingClientRect();
 
-    const chatRect =
-        chat.getBoundingClientRect();
+	const chatRect =
+		chat.getBoundingClientRect();
 
 
-    /*
-     * Show temporarily to calculate size
-     */
+	/*
+	 * Show temporarily to calculate size
+	 */
 
-    menu.style.display =
-        "block";
+	menu.style.display =
+		"block";
 
-    menu.style.visibility =
-        "hidden";
+	menu.style.visibility =
+		"hidden";
 
 
-    const menuRect =
-        menu.getBoundingClientRect();
+	const menuRect =
+		menu.getBoundingClientRect();
 
 
-    /*
-     * Chat boundaries
-     */
+	/*
+	 * Chat boundaries
+	 */
 
-    const chatLeft =
-        chatRect.left + 5;
+	const chatLeft =
+		chatRect.left + 5;
 
-    const chatRight =
-        chatRect.right - 5;
+	const chatRight =
+		chatRect.right - 5;
 
-    const chatTop =
-        chatRect.top + 5;
+	const chatTop =
+		chatRect.top + 5;
 
-    const chatBottom =
-        chatRect.bottom - 5;
+	const chatBottom =
+		chatRect.bottom - 5;
 
 
-    /*
-     * ================================
-     * HORIZONTAL POSITION
-     * ================================
-     */
+	/*
+	 * ================================
+	 * HORIZONTAL POSITION
+	 * ================================
+	 */
 
-    let left =
-        buttonRect.right -
-        menuRect.width;
+	let left =
+		buttonRect.right -
+		menuRect.width;
 
 
-    /*
-     * Never go into Users panel
-     */
+	/*
+	 * Never go into Users panel
+	 */
 
-    if (
-        left <
-        chatLeft
-    ) {
+	if (
+		left <
+		chatLeft
+	) {
 
-        left =
-            chatLeft;
+		left =
+			chatLeft;
 
-    }
+	}
 
 
-    /*
-     * Never go outside chat panel
-     */
+	/*
+	 * Never go outside chat panel
+	 */
 
-    if (
-        left +
-        menuRect.width >
-        chatRight
-    ) {
+	if (
+		left +
+		menuRect.width >
+		chatRight
+	) {
 
-        left =
-            chatRight -
-            menuRect.width;
+		left =
+			chatRight -
+			menuRect.width;
 
-    }
+	}
 
 
-    /*
-     * ================================
-     * VERTICAL POSITION
-     * ================================
-     */
+	/*
+	 * ================================
+	 * VERTICAL POSITION
+	 * ================================
+	 */
 
-    let top =
-        buttonRect.bottom + 5;
+	let top =
+		buttonRect.bottom + 5;
 
 
-    /*
-     * If menu doesn't fit below,
-     * open above the button.
-     */
+	/*
+	 * If menu doesn't fit below,
+	 * open above the button.
+	 */
 
-    if (
-        top +
-        menuRect.height >
-        chatBottom
-    ) {
+	if (
+		top +
+		menuRect.height >
+		chatBottom
+	) {
 
-        top =
-            buttonRect.top -
-            menuRect.height -
-            5;
+		top =
+			buttonRect.top -
+			menuRect.height -
+			5;
 
-    }
+	}
 
 
-    /*
-     * If still above chat,
-     * keep it inside chat.
-     */
+	/*
+	 * If still above chat,
+	 * keep it inside chat.
+	 */
 
-    if (
-        top <
-        chatTop
-    ) {
+	if (
+		top <
+		chatTop
+	) {
 
-        top =
-            chatTop;
+		top =
+			chatTop;
 
-    }
+	}
 
 
-    /*
-     * ================================
-     * APPLY POSITION
-     * ================================
-     */
+	/*
+	 * ================================
+	 * APPLY POSITION
+	 * ================================
+	 */
 
-    menu.style.left =
-        left + "px";
+	menu.style.left =
+		left + "px";
 
-    menu.style.top =
-        top + "px";
+	menu.style.top =
+		top + "px";
 
-    menu.style.right =
-        "auto";
+	menu.style.right =
+		"auto";
 
-    menu.style.bottom =
-        "auto";
+	menu.style.bottom =
+		"auto";
 
-    menu.style.visibility =
-        "visible";
+	menu.style.visibility =
+		"visible";
 
 }
 /* =====================================================
@@ -1660,116 +1703,116 @@ function toggleMessageMenu(messageId) {
 ===================================================== */
 
 function replyToMessage(
-    messageId
+	messageId
 ) {
 
-    const message =
-        messageStore[
-            messageId
-        ];
+	const message =
+		messageStore[
+		messageId
+		];
 
 
-    if (!message) {
+	if (!message) {
 
-        console.error(
-            "Message not found:",
-            messageId
-        );
+		console.error(
+			"Message not found:",
+			messageId
+		);
 
-        return;
+		return;
 
-    }
-
-
-    /*
-     * Close menu
-     */
-
-    closeAllMessageMenus();
+	}
 
 
-    /*
-     * Store reply
-     */
+	/*
+	 * Close menu
+	 */
 
-    replyingToMessage = {
-
-        messageId:
-            message.id,
-
-        sender:
-            message.sender,
-
-        content:
-            message.content
-
-    };
+	closeAllMessageMenus();
 
 
-    /*
-     * Find preview
-     */
+	/*
+	 * Store reply
+	 */
 
-    let preview =
-        document.getElementById(
-            "replyPreview"
-        );
+	replyingToMessage = {
 
+		messageId:
+			message.id,
 
-    /*
-     * If index.html already has it,
-     * use it.
-     */
+		sender:
+			message.sender,
 
-    if (!preview) {
+		content:
+			message.content
 
-        const input =
-            document.getElementById(
-                "message"
-            );
+	};
 
 
-        if (
-            input &&
-            input.parentElement
-        ) {
+	/*
+	 * Find preview
+	 */
 
-            preview =
-                document.createElement(
-                    "div"
-                );
-
-
-            preview.id =
-                "replyPreview";
+	let preview =
+		document.getElementById(
+			"replyPreview"
+		);
 
 
-            input.parentElement.insertBefore(
-                preview,
-                input
-            );
+	/*
+	 * If index.html already has it,
+	 * use it.
+	 */
 
-        }
+	if (!preview) {
 
-    }
-
-
-    if (!preview) {
-
-        return;
-
-    }
+		const input =
+			document.getElementById(
+				"message"
+			);
 
 
-    /*
-     * Show preview
-     */
+		if (
+			input &&
+			input.parentElement
+		) {
 
-    preview.style.display =
-        "block";
+			preview =
+				document.createElement(
+					"div"
+				);
 
 
-    preview.innerHTML = `
+			preview.id =
+				"replyPreview";
+
+
+			input.parentElement.insertBefore(
+				preview,
+				input
+			);
+
+		}
+
+	}
+
+
+	if (!preview) {
+
+		return;
+
+	}
+
+
+	/*
+	 * Show preview
+	 */
+
+	preview.style.display =
+		"block";
+
+
+	preview.innerHTML = `
 
         <div
             style="
@@ -1827,8 +1870,8 @@ function replyToMessage(
 
                 Replying to
                 ${escapeHtml(
-                    message.sender
-                )}
+		message.sender
+	)}
 
             </div>
 
@@ -1847,8 +1890,8 @@ function replyToMessage(
             >
 
                 ${escapeHtml(
-                    message.content
-                )}
+		message.content
+	)}
 
             </div>
 
@@ -1857,17 +1900,17 @@ function replyToMessage(
     `;
 
 
-    const input =
-        document.getElementById(
-            "message"
-        );
+	const input =
+		document.getElementById(
+			"message"
+		);
 
 
-    if (input) {
+	if (input) {
 
-        input.focus();
+		input.focus();
 
-    }
+	}
 
 }
 
@@ -1878,25 +1921,25 @@ function replyToMessage(
 
 function cancelReply() {
 
-    replyingToMessage =
-        null;
+	replyingToMessage =
+		null;
 
 
-    const preview =
-        document.getElementById(
-            "replyPreview"
-        );
+	const preview =
+		document.getElementById(
+			"replyPreview"
+		);
 
 
-    if (preview) {
+	if (preview) {
 
-        preview.innerHTML =
-            "";
+		preview.innerHTML =
+			"";
 
-        preview.style.display =
-            "none";
+		preview.style.display =
+			"none";
 
-    }
+	}
 
 }
 
@@ -1907,71 +1950,71 @@ function cancelReply() {
 
 function markAsRead() {
 
-    if (
-        !currentChatUser
-    ) {
+	if (
+		!currentChatUser
+	) {
 
-        return;
+		return;
 
-    }
-
-
-    /*
-     * Immediately remove
-     * local unread badge.
-     */
-
-    if (
-        typeof updateUnreadBadge ===
-        "function"
-    ) {
-
-        updateUnreadBadge(
-            currentChatUser,
-            0
-        );
-
-    }
+	}
 
 
-    /*
-     * WebSocket
-     */
+	/*
+	 * Immediately remove
+	 * local unread badge.
+	 */
 
-    if (
-        !stompClient ||
-        !stompClient.connected
-    ) {
+	if (
+		typeof updateUnreadBadge ===
+		"function"
+	) {
 
-        console.log(
-            "WebSocket not connected while marking read."
-        );
+		updateUnreadBadge(
+			currentChatUser,
+			0
+		);
 
-        return;
-
-    }
-
-
-    stompClient.send(
-
-        "/app/read",
-
-        {},
-
-        JSON.stringify({
-
-            sender:
-                currentChatUser
-
-        })
-
-    );
+	}
 
 
-    console.log(
-        "Messages marked READ:",
-        currentChatUser
-    );
+	/*
+	 * WebSocket
+	 */
+
+	if (
+		!stompClient ||
+		!stompClient.connected
+	) {
+
+		console.log(
+			"WebSocket not connected while marking read."
+		);
+
+		return;
+
+	}
+
+
+	stompClient.send(
+
+		"/app/read",
+
+		{},
+
+		JSON.stringify({
+
+			sender:
+				currentChatUser
+
+		})
+
+	);
+
+
+	console.log(
+		"Messages marked READ:",
+		currentChatUser
+	);
 
 }
 
@@ -1981,93 +2024,93 @@ function markAsRead() {
 ===================================================== */
 
 function deleteMessage(
-    messageId
+	messageId
 ) {
 
-    closeAllMessageMenus();
+	closeAllMessageMenus();
 
 
-    const token =
-        localStorage.getItem(
-            "token"
-        );
+	const token =
+		localStorage.getItem(
+			"token"
+		);
 
 
-    if (!token) {
+	if (!token) {
 
-        return;
+		return;
 
-    }
-
-
-    fetch(
-        "/messages/delete/" +
-        messageId,
-        {
-
-            method:
-                "DELETE",
-
-            headers: {
-
-                "Authorization":
-                    "Bearer " + token
-
-            }
-
-        }
-    )
-
-    .then(
-        function (response) {
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "Delete For Me failed. HTTP " +
-                    response.status
-                );
-
-            }
+	}
 
 
-            const messageDiv =
-                document.getElementById(
-                    "message-" +
-                    messageId
-                );
+	fetch(
+		"/messages/delete/" +
+		messageId,
+		{
+
+			method:
+				"DELETE",
+
+			headers: {
+
+				"Authorization":
+					"Bearer " + token
+
+			}
+
+		}
+	)
+
+		.then(
+			function(response) {
+
+				if (!response.ok) {
+
+					throw new Error(
+						"Delete For Me failed. HTTP " +
+						response.status
+					);
+
+				}
 
 
-            if (
-                messageDiv
-            ) {
-
-                messageDiv.remove();
-
-            }
+				const messageDiv =
+					document.getElementById(
+						"message-" +
+						messageId
+					);
 
 
-            /*
-             * Remove from local store
-             */
+				if (
+					messageDiv
+				) {
 
-            delete messageStore[
-                messageId
-            ];
+					messageDiv.remove();
 
-        }
-    )
+				}
 
-    .catch(
-        function (error) {
 
-            console.error(
-                "Delete For Me error:",
-                error
-            );
+				/*
+				 * Remove from local store
+				 */
 
-        }
-    );
+				delete messageStore[
+					messageId
+				];
+
+			}
+		)
+
+		.catch(
+			function(error) {
+
+				console.error(
+					"Delete For Me error:",
+					error
+				);
+
+			}
+		);
 
 }
 
@@ -2077,76 +2120,76 @@ function deleteMessage(
 ===================================================== */
 
 function deleteForEveryone(
-    messageId
+	messageId
 ) {
 
-    closeAllMessageMenus();
+	closeAllMessageMenus();
 
 
-    if (
-        !stompClient ||
-        !stompClient.connected
-    ) {
+	if (
+		!stompClient ||
+		!stompClient.connected
+	) {
 
-        console.error(
-            "WebSocket not connected."
-        );
+		console.error(
+			"WebSocket not connected."
+		);
 
-        return;
+		return;
 
-    }
-
-
-    const message =
-        messageStore[
-            messageId
-        ];
+	}
 
 
-    if (!message) {
-
-        console.error(
-            "Message not found:",
-            messageId
-        );
-
-        return;
-
-    }
+	const message =
+		messageStore[
+		messageId
+		];
 
 
-    /*
-     * Only sender can do this.
-     */
+	if (!message) {
 
-    if (
-        message.sender !==
-        loggedInUser
-    ) {
+		console.error(
+			"Message not found:",
+			messageId
+		);
 
-        console.error(
-            "Only sender can delete for everyone."
-        );
+		return;
 
-        return;
-
-    }
+	}
 
 
-    stompClient.send(
+	/*
+	 * Only sender can do this.
+	 */
 
-        "/app/deleteForEveryone",
+	if (
+		message.sender !==
+		loggedInUser
+	) {
 
-        {},
+		console.error(
+			"Only sender can delete for everyone."
+		);
 
-        JSON.stringify({
+		return;
 
-            messageId:
-                messageId
+	}
 
-        })
 
-    );
+	stompClient.send(
+
+		"/app/deleteForEveryone",
+
+		{},
+
+		JSON.stringify({
+
+			messageId:
+				messageId
+
+		})
+
+	);
 
 }
 
@@ -2156,129 +2199,129 @@ function deleteForEveryone(
 ===================================================== */
 
 function editMessage(
-    messageId
+	messageId
 ) {
 
-    const message =
-        messageStore[
-            messageId
-        ];
+	const message =
+		messageStore[
+		messageId
+		];
 
 
-    if (!message) {
+	if (!message) {
 
-        console.error(
-            "Message not found for edit:",
-            messageId
-        );
+		console.error(
+			"Message not found for edit:",
+			messageId
+		);
 
-        return;
+		return;
 
-    }
-
-
-    /*
-     * Sender only
-     */
-
-    if (
-        message.sender !==
-        loggedInUser
-    ) {
-
-        console.error(
-            "Only sender can edit."
-        );
-
-        return;
-
-    }
+	}
 
 
-    /*
-     * Deleted message
-     */
+	/*
+	 * Sender only
+	 */
 
-    if (
-        message.status ===
-        "DELETED"
-    ) {
+	if (
+		message.sender !==
+		loggedInUser
+	) {
 
-        console.error(
-            "Deleted message cannot be edited."
-        );
+		console.error(
+			"Only sender can edit."
+		);
 
-        return;
+		return;
 
-    }
-
-
-    closeAllMessageMenus();
+	}
 
 
-    /*
-     * Store edit ID
-     */
+	/*
+	 * Deleted message
+	 */
 
-    editingMessageId =
-        messageId;
+	if (
+		message.status ===
+		"DELETED"
+	) {
 
+		console.error(
+			"Deleted message cannot be edited."
+		);
 
-    const input =
-        document.getElementById(
-            "message"
-        );
+		return;
 
-
-    if (!input) {
-
-        editingMessageId =
-            null;
-
-        console.error(
-            "Message input not found."
-        );
-
-        return;
-
-    }
+	}
 
 
-    /*
-     * Put old content
-     * into input.
-     */
-
-    input.value =
-        message.content;
+	closeAllMessageMenus();
 
 
-    input.focus();
+	/*
+	 * Store edit ID
+	 */
+
+	editingMessageId =
+		messageId;
 
 
-    /*
-     * Move cursor to end.
-     */
-
-    input.setSelectionRange(
-        input.value.length,
-        input.value.length
-    );
+	const input =
+		document.getElementById(
+			"message"
+		);
 
 
-    /*
-     * Change Send -> Save
-     */
+	if (!input) {
 
-    setEditMode(
-        true
-    );
+		editingMessageId =
+			null;
+
+		console.error(
+			"Message input not found."
+		);
+
+		return;
+
+	}
 
 
-    console.log(
-        "EDIT MODE:",
-        messageId
-    );
+	/*
+	 * Put old content
+	 * into input.
+	 */
+
+	input.value =
+		message.content;
+
+
+	input.focus();
+
+
+	/*
+	 * Move cursor to end.
+	 */
+
+	input.setSelectionRange(
+		input.value.length,
+		input.value.length
+	);
+
+
+	/*
+	 * Change Send -> Save
+	 */
+
+	setEditMode(
+		true
+	);
+
+
+	console.log(
+		"EDIT MODE:",
+		messageId
+	);
 
 }
 
@@ -2288,83 +2331,83 @@ function editMessage(
 ===================================================== */
 
 function setEditMode(
-    isEditing
+	isEditing
 ) {
 
-    const sendButton =
-        document.querySelector(
-            ".send-button"
-        );
+	const sendButton =
+		document.querySelector(
+			".send-button"
+		);
 
 
-    if (!sendButton) {
+	if (!sendButton) {
 
-        console.error(
-            ".send-button not found."
-        );
+		console.error(
+			".send-button not found."
+		);
 
-        return;
+		return;
 
-    }
-
-
-    if (
-        isEditing
-    ) {
-
-        /*
-         * Save icon
-         */
-
-        sendButton.innerHTML =
-            '<i class="fa-solid fa-check"></i>';
+	}
 
 
-        sendButton.title =
-            "Save Edit";
+	if (
+		isEditing
+	) {
+
+		/*
+		 * Save icon
+		 */
+
+		sendButton.innerHTML =
+			'<i class="fa-solid fa-check"></i>';
 
 
-        /*
-         * Replace onclick
-         */
-
-        sendButton.onclick =
-            saveEditedMessage;
+		sendButton.title =
+			"Save Edit";
 
 
-        /*
-         * Cancel button
-         */
+		/*
+		 * Replace onclick
+		 */
 
-        if (
-            !document.getElementById(
-                "cancelEditButton"
-            )
-        ) {
-
-            const cancelButton =
-                document.createElement(
-                    "button"
-                );
+		sendButton.onclick =
+			saveEditedMessage;
 
 
-            cancelButton.id =
-                "cancelEditButton";
+		/*
+		 * Cancel button
+		 */
+
+		if (
+			!document.getElementById(
+				"cancelEditButton"
+			)
+		) {
+
+			const cancelButton =
+				document.createElement(
+					"button"
+				);
 
 
-            cancelButton.type =
-                "button";
+			cancelButton.id =
+				"cancelEditButton";
 
 
-            cancelButton.innerHTML =
-                '<i class="fa-solid fa-xmark"></i>';
+			cancelButton.type =
+				"button";
 
 
-            cancelButton.title =
-                "Cancel Edit";
+			cancelButton.innerHTML =
+				'<i class="fa-solid fa-xmark"></i>';
 
 
-            cancelButton.style.cssText = `
+			cancelButton.title =
+				"Cancel Edit";
+
+
+			cancelButton.style.cssText = `
 
                 width:45px;
 
@@ -2387,64 +2430,64 @@ function setEditMode(
             `;
 
 
-            cancelButton.onclick =
-                cancelEdit;
+			cancelButton.onclick =
+				cancelEdit;
 
 
-            const row =
-                sendButton.parentElement;
+			const row =
+				sendButton.parentElement;
 
 
-            if (row) {
+			if (row) {
 
-                row.insertBefore(
-                    cancelButton,
-                    sendButton
-                );
+				row.insertBefore(
+					cancelButton,
+					sendButton
+				);
 
-            }
+			}
 
-        }
+		}
 
-    }
+	}
 
-    else {
+	else {
 
-        /*
-         * Normal send icon
-         */
+		/*
+		 * Normal send icon
+		 */
 
-        sendButton.innerHTML =
-            '<i class="fa-solid fa-paper-plane"></i>';
-
-
-        sendButton.title =
-            "Send message";
+		sendButton.innerHTML =
+			'<i class="fa-solid fa-paper-plane"></i>';
 
 
-        sendButton.onclick =
-            sendMessage;
+		sendButton.title =
+			"Send message";
 
 
-        /*
-         * Remove cancel button
-         */
-
-        const cancelButton =
-            document.getElementById(
-                "cancelEditButton"
-            );
+		sendButton.onclick =
+			sendMessage;
 
 
-        if (
-            cancelButton
-        ) {
+		/*
+		 * Remove cancel button
+		 */
 
-            cancelButton.remove();
+		const cancelButton =
+			document.getElementById(
+				"cancelEditButton"
+			);
 
-        }
 
-    }
+		if (
+			cancelButton
+		) {
+
+			cancelButton.remove();
+
+		}
+
+	}
 
 }
 
@@ -2455,162 +2498,162 @@ function setEditMode(
 
 function saveEditedMessage() {
 
-    if (
-        editingMessageId ===
-        null
-    ) {
+	if (
+		editingMessageId ===
+		null
+	) {
 
-        console.error(
-            "No message is being edited."
-        );
+		console.error(
+			"No message is being edited."
+		);
 
-        return;
+		return;
 
-    }
-
-
-    const input =
-        document.getElementById(
-            "message"
-        );
+	}
 
 
-    if (!input) {
-
-        return;
-
-    }
-
-
-    const newContent =
-        input.value.trim();
+	const input =
+		document.getElementById(
+			"message"
+		);
 
 
-    if (!newContent) {
+	if (!input) {
 
-        alert(
-            "Message cannot be empty."
-        );
+		return;
 
-        input.focus();
-
-        return;
-
-    }
+	}
 
 
-    if (
-        !stompClient ||
-        !stompClient.connected
-    ) {
-
-        alert(
-            "WebSocket is not connected."
-        );
-
-        return;
-
-    }
+	const newContent =
+		input.value.trim();
 
 
-    const messageId =
-        editingMessageId;
+	if (!newContent) {
+
+		alert(
+			"Message cannot be empty."
+		);
+
+		input.focus();
+
+		return;
+
+	}
 
 
-    const message =
-        messageStore[
-            messageId
-        ];
+	if (
+		!stompClient ||
+		!stompClient.connected
+	) {
+
+		alert(
+			"WebSocket is not connected."
+		);
+
+		return;
+
+	}
 
 
-    if (!message) {
-
-        console.error(
-            "Message not found:",
-            messageId
-        );
-
-        return;
-
-    }
+	const messageId =
+		editingMessageId;
 
 
-    if (
-        message.sender !==
-        loggedInUser
-    ) {
-
-        console.error(
-            "Only sender can edit."
-        );
-
-        return;
-
-    }
+	const message =
+		messageStore[
+		messageId
+		];
 
 
-    /*
-     * Send edit request.
-     */
+	if (!message) {
 
-    stompClient.send(
+		console.error(
+			"Message not found:",
+			messageId
+		);
 
-        "/app/edit",
+		return;
 
-        {},
-
-        JSON.stringify({
-
-            messageId:
-                messageId,
-
-            content:
-                newContent
-
-        })
-
-    );
+	}
 
 
-    /*
-     * Update local store immediately.
-     *
-     * WebSocket event will update
-     * the final UI.
-     */
+	if (
+		message.sender !==
+		loggedInUser
+	) {
 
-    message.content =
-        newContent;
+		console.error(
+			"Only sender can edit."
+		);
 
+		return;
 
-    /*
-     * Clear input.
-     */
-
-    input.value =
-        "";
+	}
 
 
-    /*
-     * Exit edit mode.
-     */
+	/*
+	 * Send edit request.
+	 */
 
-    editingMessageId =
-        null;
+	stompClient.send(
+
+		"/app/edit",
+
+		{},
+
+		JSON.stringify({
+
+			messageId:
+				messageId,
+
+			content:
+				newContent
+
+		})
+
+	);
 
 
-    setEditMode(
-        false
-    );
+	/*
+	 * Update local store immediately.
+	 *
+	 * WebSocket event will update
+	 * the final UI.
+	 */
+
+	message.content =
+		newContent;
 
 
-    input.focus();
+	/*
+	 * Clear input.
+	 */
+
+	input.value =
+		"";
 
 
-    console.log(
-        "Edit request sent:",
-        messageId
-    );
+	/*
+	 * Exit edit mode.
+	 */
+
+	editingMessageId =
+		null;
+
+
+	setEditMode(
+		false
+	);
+
+
+	input.focus();
+
+
+	console.log(
+		"Edit request sent:",
+		messageId
+	);
 
 }
 
@@ -2621,34 +2664,34 @@ function saveEditedMessage() {
 
 function cancelEdit() {
 
-    editingMessageId =
-        null;
+	editingMessageId =
+		null;
 
 
-    const input =
-        document.getElementById(
-            "message"
-        );
+	const input =
+		document.getElementById(
+			"message"
+		);
 
 
-    if (input) {
+	if (input) {
 
-        input.value =
-            "";
+		input.value =
+			"";
 
-    }
-
-
-    setEditMode(
-        false
-    );
+	}
 
 
-    if (input) {
+	setEditMode(
+		false
+	);
 
-        input.focus();
 
-    }
+	if (input) {
+
+		input.focus();
+
+	}
 
 }
 
@@ -2660,137 +2703,137 @@ function cancelEdit() {
 ===================================================== */
 
 function updateEditedMessage(
-    event
+	event
 ) {
 
-    console.log(
-        "EDIT UPDATE RECEIVED:",
-        event
-    );
+	console.log(
+		"EDIT UPDATE RECEIVED:",
+		event
+	);
 
 
-    if (
-        !event ||
-        event.messageId ===
-        undefined ||
-        event.messageId ===
-        null
-    ) {
+	if (
+		!event ||
+		event.messageId ===
+		undefined ||
+		event.messageId ===
+		null
+	) {
 
-        console.error(
-            "Invalid edit event:",
-            event
-        );
+		console.error(
+			"Invalid edit event:",
+			event
+		);
 
-        return;
+		return;
 
-    }
-
-
-    const messageId =
-        event.messageId;
+	}
 
 
-    /*
-     * Update local store.
-     */
-
-    if (
-        !messageStore[
-            messageId
-        ]
-    ) {
-
-        messageStore[
-            messageId
-        ] = {};
-
-    }
+	const messageId =
+		event.messageId;
 
 
-    messageStore[
-        messageId
-    ].id =
-        messageId;
+	/*
+	 * Update local store.
+	 */
+
+	if (
+		!messageStore[
+		messageId
+		]
+	) {
+
+		messageStore[
+			messageId
+		] = {};
+
+	}
 
 
-    messageStore[
-        messageId
-    ].content =
-        event.content;
+	messageStore[
+		messageId
+	].id =
+		messageId;
 
 
-    messageStore[
-        messageId
-    ].edited =
-        event.edited !==
-        false;
+	messageStore[
+		messageId
+	].content =
+		event.content;
 
 
-    /*
-     * Find message in UI.
-     */
-
-    const messageDiv =
-        document.getElementById(
-            "message-" +
-            messageId
-        );
+	messageStore[
+		messageId
+	].edited =
+		event.edited !==
+		false;
 
 
-    if (!messageDiv) {
+	/*
+	 * Find message in UI.
+	 */
 
-        console.log(
-            "Edited message is not currently visible."
-        );
-
-        return;
-
-    }
-
-
-    const contentElement =
-        messageDiv.querySelector(
-            ".message-content"
-        );
+	const messageDiv =
+		document.getElementById(
+			"message-" +
+			messageId
+		);
 
 
-    if (!contentElement) {
+	if (!messageDiv) {
 
-        return;
+		console.log(
+			"Edited message is not currently visible."
+		);
 
-    }
+		return;
 
-
-    /*
-     * Replace text safely.
-     */
-
-    contentElement.innerHTML =
-        escapeHtml(
-            event.content
-        );
+	}
 
 
-    /*
-     * Add edited label.
-     */
-
-    if (
-        event.edited !== false
-    ) {
-
-        const label =
-            document.createElement(
-                "span"
-            );
+	const contentElement =
+		messageDiv.querySelector(
+			".message-content"
+		);
 
 
-        label.className =
-            "edited-label";
+	if (!contentElement) {
+
+		return;
+
+	}
 
 
-        label.style.cssText = `
+	/*
+	 * Replace text safely.
+	 */
+
+	contentElement.innerHTML =
+		escapeHtml(
+			event.content
+		);
+
+
+	/*
+	 * Add edited label.
+	 */
+
+	if (
+		event.edited !== false
+	) {
+
+		const label =
+			document.createElement(
+				"span"
+			);
+
+
+		label.className =
+			"edited-label";
+
+
+		label.style.cssText = `
 
             color:#777;
 
@@ -2803,21 +2846,21 @@ function updateEditedMessage(
         `;
 
 
-        label.textContent =
-            "(edited)";
+		label.textContent =
+			"(edited)";
 
 
-        contentElement.appendChild(
-            label
-        );
+		contentElement.appendChild(
+			label
+		);
 
-    }
+	}
 
 
-    console.log(
-        "EDIT APPLIED:",
-        messageId
-    );
+	console.log(
+		"EDIT APPLIED:",
+		messageId
+	);
 
 }
 
@@ -2829,27 +2872,27 @@ function updateEditedMessage(
 ===================================================== */
 
 function updateDeletedMessage(
-    messageId
+	messageId
 ) {
 
-    console.log(
-        "DELETE FOR EVERYONE EVENT:",
-        messageId
-    );
+	console.log(
+		"DELETE FOR EVERYONE EVENT:",
+		messageId
+	);
 
 
-    const messageDiv =
-        document.getElementById(
-            "message-" +
-            messageId
-        );
+	const messageDiv =
+		document.getElementById(
+			"message-" +
+			messageId
+		);
 
 
-    if (
-        messageDiv
-    ) {
+	if (
+		messageDiv
+	) {
 
-        messageDiv.innerHTML = `
+		messageDiv.innerHTML = `
 
             <div
                 style="
@@ -2866,31 +2909,31 @@ function updateDeletedMessage(
 
         `;
 
-    }
+	}
 
 
-    /*
-     * Update local store.
-     */
+	/*
+	 * Update local store.
+	 */
 
-    if (
-        messageStore[
-            messageId
-        ]
-    ) {
+	if (
+		messageStore[
+		messageId
+		]
+	) {
 
-        messageStore[
-            messageId
-        ].content =
-            "This message was deleted";
+		messageStore[
+			messageId
+		].content =
+			"This message was deleted";
 
 
-        messageStore[
-            messageId
-        ].status =
-            "DELETED";
+		messageStore[
+			messageId
+		].status =
+			"DELETED";
 
-    }
+	}
 
 }
 
@@ -2900,19 +2943,19 @@ function updateDeletedMessage(
 
 function isChatNearBottom() {
 
-    const chat =
-        document.getElementById("chat");
+	const chat =
+		document.getElementById("chat");
 
-    if (!chat) {
-        return true;
-    }
+	if (!chat) {
+		return true;
+	}
 
-    const distanceFromBottom =
-        chat.scrollHeight -
-        chat.scrollTop -
-        chat.clientHeight;
+	const distanceFromBottom =
+		chat.scrollHeight -
+		chat.scrollTop -
+		chat.clientHeight;
 
-    return distanceFromBottom <= 80;
+	return distanceFromBottom <= 80;
 }
 
 
@@ -2921,40 +2964,40 @@ function isChatNearBottom() {
 ===================================================== */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+	"DOMContentLoaded",
+	function() {
 
-        const chat =
-            document.getElementById("chat");
+		const chat =
+			document.getElementById("chat");
 
-        if (!chat) {
-            return;
-        }
+		if (!chat) {
+			return;
+		}
 
-        chat.addEventListener(
-            "scroll",
-            function () {
+		chat.addEventListener(
+			"scroll",
+			function() {
 
-                userIsNearBottom =
-                    isChatNearBottom();
+				userIsNearBottom =
+					isChatNearBottom();
 
-                /*
-                 * If user reaches bottom,
-                 * remove new-message indicator.
-                 */
+				/*
+				 * If user reaches bottom,
+				 * remove new-message indicator.
+				 */
 
-                if (userIsNearBottom) {
+				if (userIsNearBottom) {
 
-                    newMessageCount = 0;
+					newMessageCount = 0;
 
-                    hideNewMessageButton();
+					hideNewMessageButton();
 
-                }
+				}
 
-            }
-        );
+			}
+		);
 
-    }
+	}
 );
 
 
@@ -2964,28 +3007,28 @@ document.addEventListener(
 
 function scrollChatToBottom() {
 
-    const chat =
-        document.getElementById("chat");
+	const chat =
+		document.getElementById("chat");
 
-    if (!chat) {
-        return;
-    }
+	if (!chat) {
+		return;
+	}
 
-    chat.scrollTo({
+	chat.scrollTo({
 
-        top:
-            chat.scrollHeight,
+		top:
+			chat.scrollHeight,
 
-        behavior:
-            "smooth"
+		behavior:
+			"smooth"
 
-    });
+	});
 
-    userIsNearBottom = true;
+	userIsNearBottom = true;
 
-    newMessageCount = 0;
+	newMessageCount = 0;
 
-    hideNewMessageButton();
+	hideNewMessageButton();
 
 }
 
@@ -2996,28 +3039,28 @@ function scrollChatToBottom() {
 
 function showNewMessageButton() {
 
-    let button =
-        document.getElementById(
-            "newMessageButton"
-        );
+	let button =
+		document.getElementById(
+			"newMessageButton"
+		);
 
-    if (!button) {
+	if (!button) {
 
-        button =
-            document.createElement(
-                "button"
-            );
+		button =
+			document.createElement(
+				"button"
+			);
 
-        button.id =
-            "newMessageButton";
+		button.id =
+			"newMessageButton";
 
-        button.type =
-            "button";
+		button.type =
+			"button";
 
-        button.innerHTML =
-            "↓ New message";
+		button.innerHTML =
+			"↓ New message";
 
-        button.style.cssText = `
+		button.style.cssText = `
 
             position:absolute;
 
@@ -3051,79 +3094,79 @@ function showNewMessageButton() {
 
         `;
 
-        button.onclick =
-            scrollChatToBottom;
+		button.onclick =
+			scrollChatToBottom;
 
 
-        /*
-         * Put button inside chat's
-         * parent so it stays with chat.
-         */
+		/*
+		 * Put button inside chat's
+		 * parent so it stays with chat.
+		 */
 
-        const chat =
-            document.getElementById(
-                "chat"
-            );
+		const chat =
+			document.getElementById(
+				"chat"
+			);
 
-        if (
-            chat &&
-            chat.parentElement
-        ) {
+		if (
+			chat &&
+			chat.parentElement
+		) {
 
-            const parent =
-                chat.parentElement;
+			const parent =
+				chat.parentElement;
 
-            /*
-             * Make parent positioning
-             * context.
-             */
+			/*
+			 * Make parent positioning
+			 * context.
+			 */
 
-            if (
-                getComputedStyle(
-                    parent
-                ).position ===
-                "static"
-            ) {
+			if (
+				getComputedStyle(
+					parent
+				).position ===
+				"static"
+			) {
 
-                parent.style.position =
-                    "relative";
+				parent.style.position =
+					"relative";
 
-            }
+			}
 
-            parent.appendChild(
-                button
-            );
+			parent.appendChild(
+				button
+			);
 
-        }
+		}
 
-    }
-
-
-    button.style.display =
-        "block";
+	}
 
 
-    /*
-     * Show count when there are
-     * multiple new messages.
-     */
+	button.style.display =
+		"block";
 
-    if (
-        newMessageCount > 1
-    ) {
 
-        button.innerHTML =
-            "↓ " +
-            newMessageCount +
-            " new messages";
+	/*
+	 * Show count when there are
+	 * multiple new messages.
+	 */
 
-    }
-    else {
+	if (
+		newMessageCount > 1
+	) {
 
-        button.innerHTML =
-            "↓ New message";
+		button.innerHTML =
+			"↓ " +
+			newMessageCount +
+			" new messages";
 
-    }
+	}
+	else {
+
+		button.innerHTML =
+			"↓ New message";
+
+	}
 
 }
 
@@ -3134,17 +3177,17 @@ function showNewMessageButton() {
 
 function hideNewMessageButton() {
 
-    const button =
-        document.getElementById(
-            "newMessageButton"
-        );
+	const button =
+		document.getElementById(
+			"newMessageButton"
+		);
 
-    if (button) {
+	if (button) {
 
-        button.style.display =
-            "none";
+		button.style.display =
+			"none";
 
-    }
+	}
 
 }
 
@@ -3165,43 +3208,43 @@ let messageSearchIndex = -1;
 
 function openMessageSearch() {
 
-    const searchBar =
-        document.getElementById(
-            "messageSearchBar"
-        );
+	const searchBar =
+		document.getElementById(
+			"messageSearchBar"
+		);
 
-    const input =
-        document.getElementById(
-            "messageSearchInput"
-        );
+	const input =
+		document.getElementById(
+			"messageSearchInput"
+		);
 
-    if (!searchBar || !input) {
+	if (!searchBar || !input) {
 
-        console.error(
-            "Message search elements not found."
-        );
+		console.error(
+			"Message search elements not found."
+		);
 
-        return;
+		return;
 
-    }
+	}
 
-    searchBar.style.display =
-        "block";
+	searchBar.style.display =
+		"block";
 
-    input.value =
-        "";
+	input.value =
+		"";
 
-    input.focus();
+	input.focus();
 
 
-    input.oninput =
-        function () {
+	input.oninput =
+		function() {
 
-            searchMessages(
-                input.value
-            );
+			searchMessages(
+				input.value
+			);
 
-        };
+		};
 
 }
 
@@ -3212,41 +3255,41 @@ function openMessageSearch() {
 
 function closeMessageSearch() {
 
-    const searchBar =
-        document.getElementById(
-            "messageSearchBar"
-        );
+	const searchBar =
+		document.getElementById(
+			"messageSearchBar"
+		);
 
-    const input =
-        document.getElementById(
-            "messageSearchInput"
-        );
-
-
-    if (input) {
-
-        input.value =
-            "";
-
-    }
+	const input =
+		document.getElementById(
+			"messageSearchInput"
+		);
 
 
-    if (searchBar) {
+	if (input) {
 
-        searchBar.style.display =
-            "none";
+		input.value =
+			"";
 
-    }
-
-
-    clearSearchHighlights();
+	}
 
 
-    messageSearchMatches =
-        [];
+	if (searchBar) {
 
-    messageSearchIndex =
-        -1;
+		searchBar.style.display =
+			"none";
+
+	}
+
+
+	clearSearchHighlights();
+
+
+	messageSearchMatches =
+		[];
+
+	messageSearchIndex =
+		-1;
 
 }
 
@@ -3256,145 +3299,145 @@ function closeMessageSearch() {
 ===================================================== */
 
 function searchMessages(
-    searchText
+	searchText
 ) {
 
-    clearSearchHighlights();
+	clearSearchHighlights();
 
 
-    messageSearchMatches =
-        [];
+	messageSearchMatches =
+		[];
 
-    messageSearchIndex =
-        -1;
-
-
-    const search =
-        searchText
-            .trim()
-            .toLowerCase();
+	messageSearchIndex =
+		-1;
 
 
-    if (!search) {
-
-        return;
-
-    }
-
-
-    /*
-     * Search directly inside
-     * messageStore.
-     *
-     * DO NOT check receiver here.
-     *
-     * Chat history was already loaded
-     * for the selected conversation.
-     */
-
-    Object.values(
-        messageStore
-    ).forEach(
-        function (message) {
-
-            if (!message) {
-
-                return;
-
-            }
+	const search =
+		searchText
+			.trim()
+			.toLowerCase();
 
 
-            const content =
-                String(
-                    message.content ||
-                    ""
-                );
+	if (!search) {
+
+		return;
+
+	}
 
 
-            if (
-                content
-                    .toLowerCase()
-                    .includes(search)
-            ) {
+	/*
+	 * Search directly inside
+	 * messageStore.
+	 *
+	 * DO NOT check receiver here.
+	 *
+	 * Chat history was already loaded
+	 * for the selected conversation.
+	 */
 
-                messageSearchMatches.push(
-                    message.id
-                );
+	Object.values(
+		messageStore
+	).forEach(
+		function(message) {
 
-            }
+			if (!message) {
 
-        }
-    );
+				return;
 
-
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "SEARCH:",
-        search
-    );
-
-    console.log(
-        "MATCHES:",
-        messageSearchMatches
-    );
-
-    console.log(
-        "MATCH COUNT:",
-        messageSearchMatches.length
-    );
-
-    console.log(
-        "================================="
-    );
+			}
 
 
-    /*
-     * Nothing found
-     */
-
-    if (
-        messageSearchMatches.length ===
-        0
-    ) {
-
-        showSearchResultMessage(
-            "No messages found"
-        );
-
-        return;
-
-    }
+			const content =
+				String(
+					message.content ||
+					""
+				);
 
 
-    /*
-     * Show result count
-     */
+			if (
+				content
+					.toLowerCase()
+					.includes(search)
+			) {
 
-    showSearchResultMessage(
+				messageSearchMatches.push(
+					message.id
+				);
 
-        messageSearchMatches.length +
-        (
-            messageSearchMatches.length ===
-            1
-            ? " message found"
-            : " messages found"
-        )
+			}
 
-    );
-
-
-    /*
-     * First result
-     */
-
-    messageSearchIndex =
-        0;
+		}
+	);
 
 
-    scrollToSearchResult();
+	console.log(
+		"================================="
+	);
+
+	console.log(
+		"SEARCH:",
+		search
+	);
+
+	console.log(
+		"MATCHES:",
+		messageSearchMatches
+	);
+
+	console.log(
+		"MATCH COUNT:",
+		messageSearchMatches.length
+	);
+
+	console.log(
+		"================================="
+	);
+
+
+	/*
+	 * Nothing found
+	 */
+
+	if (
+		messageSearchMatches.length ===
+		0
+	) {
+
+		showSearchResultMessage(
+			"No messages found"
+		);
+
+		return;
+
+	}
+
+
+	/*
+	 * Show result count
+	 */
+
+	showSearchResultMessage(
+
+		messageSearchMatches.length +
+		(
+			messageSearchMatches.length ===
+				1
+				? " message found"
+				: " messages found"
+		)
+
+	);
+
+
+	/*
+	 * First result
+	 */
+
+	messageSearchIndex =
+		0;
+
+
+	scrollToSearchResult();
 
 }
 
@@ -3404,41 +3447,41 @@ function searchMessages(
 ===================================================== */
 
 function showSearchResultMessage(
-    text
+	text
 ) {
 
-    let result =
-        document.getElementById(
-            "messageSearchResult"
-        );
+	let result =
+		document.getElementById(
+			"messageSearchResult"
+		);
 
 
-    if (!result) {
+	if (!result) {
 
-        const searchBar =
-            document.getElementById(
-                "messageSearchBar"
-            );
-
-
-        if (!searchBar) {
-
-            return;
-
-        }
+		const searchBar =
+			document.getElementById(
+				"messageSearchBar"
+			);
 
 
-        result =
-            document.createElement(
-                "div"
-            );
+		if (!searchBar) {
+
+			return;
+
+		}
 
 
-        result.id =
-            "messageSearchResult";
+		result =
+			document.createElement(
+				"div"
+			);
 
 
-        result.style.cssText = `
+		result.id =
+			"messageSearchResult";
+
+
+		result.style.cssText = `
 
             margin-top:5px;
 
@@ -3449,15 +3492,15 @@ function showSearchResultMessage(
         `;
 
 
-        searchBar.appendChild(
-            result
-        );
+		searchBar.appendChild(
+			result
+		);
 
-    }
+	}
 
 
-    result.textContent =
-        text;
+	result.textContent =
+		text;
 
 }
 
@@ -3468,94 +3511,94 @@ function showSearchResultMessage(
 
 function scrollToSearchResult() {
 
-    if (
-        messageSearchMatches.length ===
-        0
-    ) {
+	if (
+		messageSearchMatches.length ===
+		0
+	) {
 
-        return;
+		return;
 
-    }
-
-
-    if (
-        messageSearchIndex < 0 ||
-        messageSearchIndex >=
-        messageSearchMatches.length
-    ) {
-
-        return;
-
-    }
+	}
 
 
-    clearSearchHighlights();
+	if (
+		messageSearchIndex < 0 ||
+		messageSearchIndex >=
+		messageSearchMatches.length
+	) {
+
+		return;
+
+	}
 
 
-    const messageId =
-        messageSearchMatches[
-            messageSearchIndex
-        ];
+	clearSearchHighlights();
 
 
-    const messageElement =
-        document.getElementById(
-            "message-" +
-            messageId
-        );
+	const messageId =
+		messageSearchMatches[
+		messageSearchIndex
+		];
 
 
-    if (!messageElement) {
-
-        console.error(
-            "Message element not found:",
-            messageId
-        );
-
-        return;
-
-    }
+	const messageElement =
+		document.getElementById(
+			"message-" +
+			messageId
+		);
 
 
-    /*
-     * Scroll to message
-     */
+	if (!messageElement) {
 
-    messageElement.scrollIntoView({
+		console.error(
+			"Message element not found:",
+			messageId
+		);
 
-        behavior:
-            "smooth",
+		return;
 
-        block:
-            "center"
-
-    });
+	}
 
 
-    /*
-     * Highlight entire message
-     */
+	/*
+	 * Scroll to message
+	 */
 
-    messageElement.style.outline =
-        "2px solid #2196F3";
+	messageElement.scrollIntoView({
+
+		behavior:
+			"smooth",
+
+		block:
+			"center"
+
+	});
 
 
-    messageElement.style.borderRadius =
-        "10px";
+	/*
+	 * Highlight entire message
+	 */
+
+	messageElement.style.outline =
+		"2px solid #2196F3";
 
 
-    /*
-     * Highlight matching text
-     */
+	messageElement.style.borderRadius =
+		"10px";
 
-    highlightSearchText(
-        messageElement,
-        document
-            .getElementById(
-                "messageSearchInput"
-            )
-            ?.value || ""
-    );
+
+	/*
+	 * Highlight matching text
+	 */
+
+	highlightSearchText(
+		messageElement,
+		document
+			.getElementById(
+				"messageSearchInput"
+			)
+			?.value || ""
+	);
 
 }
 
@@ -3565,81 +3608,81 @@ function scrollToSearchResult() {
 ===================================================== */
 
 function highlightSearchText(
-    messageElement,
-    searchText
+	messageElement,
+	searchText
 ) {
 
-    const content =
-        messageElement.querySelector(
-            ".message-content"
-        );
+	const content =
+		messageElement.querySelector(
+			".message-content"
+		);
 
 
-    if (!content) {
+	if (!content) {
 
-        return;
+		return;
 
-    }
-
-
-    const search =
-        searchText.trim();
+	}
 
 
-    if (!search) {
-
-        return;
-
-    }
+	const search =
+		searchText.trim();
 
 
-    /*
-     * Save original text once
-     */
+	if (!search) {
 
-    if (
-        !content.dataset.originalText
-    ) {
+		return;
 
-        content.dataset.originalText =
-            content.textContent;
-
-    }
+	}
 
 
-    const originalText =
-        content.dataset.originalText;
+	/*
+	 * Save original text once
+	 */
+
+	if (
+		!content.dataset.originalText
+	) {
+
+		content.dataset.originalText =
+			content.textContent;
+
+	}
 
 
-    const escapedSearch =
-        search.replace(
-            /[.*+?^${}()|[\]\\]/g,
-            "\\$&"
-        );
+	const originalText =
+		content.dataset.originalText;
 
 
-    const regex =
-        new RegExp(
-            "(" +
-            escapedSearch +
-            ")",
-            "gi"
-        );
+	const escapedSearch =
+		search.replace(
+			/[.*+?^${}()|[\]\\]/g,
+			"\\$&"
+		);
 
 
-    /*
-     * Don't use innerHTML directly
-     * with the user's search text.
-     */
+	const regex =
+		new RegExp(
+			"(" +
+			escapedSearch +
+			")",
+			"gi"
+		);
 
-    const highlighted =
-        escapeHtml(
-            originalText
-        ).replace(
 
-            regex,
+	/*
+	 * Don't use innerHTML directly
+	 * with the user's search text.
+	 */
 
-            `<mark
+	const highlighted =
+		escapeHtml(
+			originalText
+		).replace(
+
+			regex,
+
+			`<mark
                 style="
                     background:#ffeb3b;
                     color:#222;
@@ -3648,11 +3691,11 @@ function highlightSearchText(
                 "
             >$1</mark>`
 
-        );
+		);
 
 
-    content.innerHTML =
-        highlighted;
+	content.innerHTML =
+		highlighted;
 
 }
 
@@ -3663,42 +3706,42 @@ function highlightSearchText(
 
 function clearSearchHighlights() {
 
-    document
-        .querySelectorAll(
-            '[id^="message-"]'
-        )
-        .forEach(
-            function (messageElement) {
+	document
+		.querySelectorAll(
+			'[id^="message-"]'
+		)
+		.forEach(
+			function(messageElement) {
 
-                messageElement.style.outline =
-                    "";
+				messageElement.style.outline =
+					"";
 
-                messageElement.style.borderRadius =
-                    "";
-
-
-                const content =
-                    messageElement.querySelector(
-                        ".message-content"
-                    );
+				messageElement.style.borderRadius =
+					"";
 
 
-                if (
-                    content &&
-                    content.dataset.originalText
-                ) {
-
-                    content.textContent =
-                        content.dataset.originalText;
+				const content =
+					messageElement.querySelector(
+						".message-content"
+					);
 
 
-                    delete content.dataset
-                        .originalText;
+				if (
+					content &&
+					content.dataset.originalText
+				) {
 
-                }
+					content.textContent =
+						content.dataset.originalText;
 
-            }
-        );
+
+					delete content.dataset
+						.originalText;
+
+				}
+
+			}
+		);
 
 }
 
@@ -3709,31 +3752,31 @@ function clearSearchHighlights() {
 
 function nextSearchResult() {
 
-    if (
-        messageSearchMatches.length ===
-        0
-    ) {
+	if (
+		messageSearchMatches.length ===
+		0
+	) {
 
-        return;
+		return;
 
-    }
-
-
-    messageSearchIndex++;
+	}
 
 
-    if (
-        messageSearchIndex >=
-        messageSearchMatches.length
-    ) {
-
-        messageSearchIndex =
-            0;
-
-    }
+	messageSearchIndex++;
 
 
-    scrollToSearchResult();
+	if (
+		messageSearchIndex >=
+		messageSearchMatches.length
+	) {
+
+		messageSearchIndex =
+			0;
+
+	}
+
+
+	scrollToSearchResult();
 
 }
 
@@ -3744,125 +3787,135 @@ function nextSearchResult() {
 
 function previousSearchResult() {
 
-    if (
-        messageSearchMatches.length ===
-        0
-    ) {
+	if (
+		messageSearchMatches.length ===
+		0
+	) {
 
-        return;
+		return;
 
-    }
-
-
-    messageSearchIndex--;
+	}
 
 
-    if (
-        messageSearchIndex < 0
-    ) {
-
-        messageSearchIndex =
-            messageSearchMatches.length - 1;
-
-    }
+	messageSearchIndex--;
 
 
-    scrollToSearchResult();
+	if (
+		messageSearchIndex < 0
+	) {
+
+		messageSearchIndex =
+			messageSearchMatches.length - 1;
+
+	}
+
+
+	scrollToSearchResult();
 
 }
 
 /* =====================================================
-   IMAGE UPLOAD
+   IMAGE SELECTION
+   -----------------------------------------------------
+   Select image first.
+   Image will be sent when user presses Enter.
 ===================================================== */
 
 function uploadImage() {
 
-    const input =
-        document.getElementById(
-            "imageInput"
-        );
+	const input =
+		document.getElementById("imageInput");
 
+	if (!input) {
+		console.error("imageInput not found");
+		return;
+	}
 
-    if (!input) {
+	const file =
+		input.files[0];
 
-        console.error(
-            "imageInput not found"
-        );
+	if (!file) {
+		return;
+	}
 
+	if (!currentChatUser) {
+
+		alert(
+			"Please select a user first."
+		);
+
+		input.value = "";
+		return;
+	}
+
+	if (!file.type.startsWith("image/")) {
+
+		alert(
+			"Please select an image."
+		);
+
+		input.value = "";
+		return;
+	}
+
+	if (
+		file.size >
+		5 * 1024 * 1024
+	) {
+
+		alert(
+			"Image must be less than 5 MB."
+		);
+
+		input.value = "";
+		return;
+	}
+
+	/*
+	 * Store selected image.
+	 * Do NOT upload yet.
+	 */
+
+	selectedImageFile = file;
+
+	console.log(
+		"Image selected:",
+		file.name
+	);
+
+	/*
+	 * Optional small indication
+	 * in message input.
+	 */
+
+	const messageInput =
+		document.getElementById(
+			"message"
+		);
+
+	if (messageInput) {
+
+		messageInput.placeholder =
+			"Press Enter to send image";
+
+		messageInput.focus();
+
+	}
+
+}
+
+/* =====================================================
+   SEND SELECTED IMAGE
+===================================================== */
+
+function sendSelectedImage() {
+
+    if (!selectedImageFile) {
         return;
     }
-
-
-    const file =
-        input.files[0];
-
-
-    if (!file) {
-
-        return;
-    }
-
-
-    /*
-     * Make sure a chat is selected
-     */
-
-    if (!currentChatUser) {
-
-        alert(
-            "Please select a user first."
-        );
-
-        input.value = "";
-
-        return;
-    }
-
-
-    /*
-     * Image validation
-     */
-
-    if (
-        !file.type.startsWith(
-            "image/"
-        )
-    ) {
-
-        alert(
-            "Please select an image."
-        );
-
-        input.value = "";
-
-        return;
-    }
-
-
-    /*
-     * Maximum 5 MB
-     */
-
-    if (
-        file.size >
-        5 * 1024 * 1024
-    ) {
-
-        alert(
-            "Image must be less than 5 MB."
-        );
-
-        input.value = "";
-
-        return;
-    }
-
 
     const token =
-        localStorage.getItem(
-            "token"
-        );
-
+        localStorage.getItem("token");
 
     if (!token) {
 
@@ -3870,57 +3923,64 @@ function uploadImage() {
             "Session expired. Please login again."
         );
 
-        input.value = "";
+        return;
+    }
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        alert(
+            "WebSocket is not connected."
+        );
 
         return;
     }
 
+    if (!currentChatUser) {
 
-    /*
-     * FormData
-     */
+        alert(
+            "Please select a user first."
+        );
+
+        return;
+    }
+
+    const file =
+        selectedImageFile;
 
     const formData =
         new FormData();
-
 
     formData.append(
         "file",
         file
     );
 
-
-    /*
-     * Upload
-     */
+    console.log(
+        "Uploading selected image:",
+        file.name
+    );
 
     fetch(
-        "/messages/upload-image",
+        "/files/upload-image",
         {
-
-            method:
-                "POST",
+            method: "POST",
 
             headers: {
-
                 "Authorization":
-                    "Bearer " +
-                    token
-
+                    "Bearer " + token
             },
 
-            body:
-                formData
-
+            body: formData
         }
     )
-
     .then(
-        async function (response) {
+        async response => {
 
             const text =
                 await response.text();
-
 
             if (!response.ok) {
 
@@ -3931,22 +3991,38 @@ function uploadImage() {
 
             }
 
+            try {
 
-            return JSON.parse(
-                text
-            );
+                return JSON.parse(
+                    text
+                );
+
+            }
+            catch (error) {
+
+                throw new Error(
+                    "Invalid server response"
+                );
+
+            }
 
         }
     )
-
     .then(
-        function (data) {
+        data => {
 
             console.log(
-                "IMAGE UPLOAD SUCCESS:",
+                "Image uploaded:",
                 data
             );
 
+            if (!data.fileUrl) {
+
+                throw new Error(
+                    "Image URL not received"
+                );
+
+            }
 
             /*
              * Send image through
@@ -3957,40 +4033,165 @@ function uploadImage() {
                 data.fileUrl
             );
 
-
             /*
-             * Clear file input.
+             * Clear selected image.
              */
 
-            input.value =
-                "";
+            selectedImageFile =
+                null;
+
+            const input =
+                document.getElementById(
+                    "imageInput"
+                );
+
+            if (input) {
+                input.value = "";
+            }
+
+            /*
+             * Restore normal input.
+             */
+
+            const messageInput =
+                document.getElementById(
+                    "message"
+                );
+
+            if (messageInput) {
+
+                messageInput.placeholder =
+                    "Type a message...";
+
+                messageInput.value =
+                    "";
+
+                messageInput.focus();
+
+            }
 
         }
     )
-
     .catch(
-        function (error) {
+        error => {
 
             console.error(
-                "IMAGE UPLOAD ERROR:",
+                "Image upload error:",
                 error
             );
-
 
             alert(
                 "Image upload failed: " +
                 error.message
             );
 
-
-            input.value =
-                "";
-
         }
     );
 
 }
 
+/* =====================================================
+   SEND IMAGE MESSAGE
+===================================================== */
+
+function sendImageMessage(
+	imageUrl
+) {
+
+	if (
+		!stompClient ||
+		!stompClient.connected
+	) {
+
+		alert(
+			"WebSocket is not connected."
+		);
+
+		return;
+	}
+
+
+	if (!currentChatUser) {
+
+		alert(
+			"Please select a user."
+		);
+
+		return;
+	}
+
+
+	/*
+	 * =========================================
+	 * BUILD IMAGE MESSAGE
+	 * =========================================
+	 */
+
+	const imageMessage = {
+
+		receiver:
+			currentChatUser,
+
+		content:
+			imageUrl,
+
+		messageType:
+			"IMAGE",
+
+		replyToMessageId:
+			replyingToMessage
+				? replyingToMessage.messageId
+				: null,
+
+		replyToContent:
+			replyingToMessage
+				? replyingToMessage.content
+				: null
+
+	};
+
+
+	console.log(
+		"Sending image message:",
+		imageMessage
+	);
+
+
+	/*
+	 * =========================================
+	 * SEND THROUGH EXISTING WEBSOCKET
+	 * =========================================
+	 */
+
+	stompClient.send(
+
+		"/app/send",
+
+		{},
+
+		JSON.stringify(
+			imageMessage
+		)
+
+	);
+
+
+	/*
+	 * =========================================
+	 * CLEAR REPLY
+	 * =========================================
+	 */
+
+	if (
+		typeof cancelReply ===
+		"function"
+	) {
+
+		cancelReply();
+
+	}
+
+}
 
 /* =====================================================
    ATTACHMENT MENU
@@ -3998,32 +4199,32 @@ function uploadImage() {
 
 function toggleAttachmentMenu() {
 
-    const menu =
-        document.getElementById(
-            "attachmentMenu"
-        );
+	const menu =
+		document.getElementById(
+			"attachmentMenu"
+		);
 
-    if (!menu) {
+	if (!menu) {
 
-        return;
-    }
+		return;
+	}
 
 
-    if (
-        menu.style.display ===
-        "block"
-    ) {
+	if (
+		menu.style.display ===
+		"block"
+	) {
 
-        menu.style.display =
-            "none";
+		menu.style.display =
+			"none";
 
-    }
-    else {
+	}
+	else {
 
-        menu.style.display =
-            "block";
+		menu.style.display =
+			"block";
 
-    }
+	}
 
 }
 
@@ -4034,17 +4235,17 @@ function toggleAttachmentMenu() {
 
 function closeAttachmentMenu() {
 
-    const menu =
-        document.getElementById(
-            "attachmentMenu"
-        );
+	const menu =
+		document.getElementById(
+			"attachmentMenu"
+		);
 
-    if (menu) {
+	if (menu) {
 
-        menu.style.display =
-            "none";
+		menu.style.display =
+			"none";
 
-    }
+	}
 
 }
 
@@ -4055,50 +4256,50 @@ function closeAttachmentMenu() {
 ===================================================== */
 
 document.addEventListener(
-    "click",
-    function (event) {
+	"click",
+	function(event) {
 
-        const menu =
-            document.getElementById(
-                "attachmentMenu"
-            );
+		const menu =
+			document.getElementById(
+				"attachmentMenu"
+			);
 
-        const button =
-            document.getElementById(
-                "attachmentButton"
-            );
-
-
-        if (!menu || !button) {
-
-            return;
-        }
+		const button =
+			document.getElementById(
+				"attachmentButton"
+			);
 
 
-        if (
-            menu.contains(
-                event.target
-            )
-        ) {
+		if (!menu || !button) {
 
-            return;
-        }
+			return;
+		}
 
 
-        if (
-            button.contains(
-                event.target
-            )
-        ) {
+		if (
+			menu.contains(
+				event.target
+			)
+		) {
 
-            return;
-        }
+			return;
+		}
 
 
-        menu.style.display =
-            "none";
+		if (
+			button.contains(
+				event.target
+			)
+		) {
 
-    }
+			return;
+		}
+
+
+		menu.style.display =
+			"none";
+
+	}
 );
 
 
@@ -4111,8 +4312,113 @@ document.addEventListener(
 
 function startVoiceRecording() {
 
-    alert(
-        "Voice recording will be added next."
-    );
+	alert(
+		"Voice recording will be added next."
+	);
 
+}
+
+/* =====================================================
+   RENDER MESSAGE CONTENT
+===================================================== */
+
+function renderMessageContent(message) {
+
+	const messageType =
+		message.messageType || "TEXT";
+
+	const content =
+		message.content || "";
+
+
+	/* =================================================
+	   IMAGE MESSAGE
+	================================================= */
+
+	if (
+		messageType.toUpperCase() ===
+		"IMAGE"
+	) {
+
+		const imageWrapper =
+			document.createElement(
+				"div"
+			);
+
+
+		imageWrapper.style.cssText = `
+            max-width:280px;
+            cursor:pointer;
+        `;
+
+
+		const image =
+			document.createElement(
+				"img"
+			);
+
+
+		image.src =
+			content;
+
+
+		image.alt =
+			"Image";
+
+
+		image.style.cssText = `
+            display:block;
+
+            max-width:280px;
+            max-height:300px;
+
+            width:auto;
+            height:auto;
+
+            border-radius:10px;
+
+            object-fit:cover;
+        `;
+
+
+		/*
+		 * Open full image
+		 * when clicked.
+		 */
+
+		image.onclick =
+			function() {
+
+				window.open(
+					content,
+					"_blank"
+				);
+
+			};
+
+
+		imageWrapper.appendChild(
+			image
+		);
+
+
+		return imageWrapper;
+	}
+
+
+	/* =================================================
+	   NORMAL TEXT MESSAGE
+	================================================= */
+
+	const text =
+		document.createElement(
+			"span"
+		);
+
+
+	text.textContent =
+		content;
+
+
+	return text;
 }
