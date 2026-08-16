@@ -15,9 +15,12 @@ import com.chat.app.dto.EditMessageEvent;
 import com.chat.app.dto.MessageResponse;
 import com.chat.app.dto.MessageStatusEvent;
 import com.chat.app.dto.MessageStatusUpdate;
+import com.chat.app.dto.ReactionEvent;
 import com.chat.app.dto.TypingMessage;
 import com.chat.app.dto.UnreadCountEvent;
 import com.chat.app.model.Message;
+import com.chat.app.model.MessageReaction;
+import com.chat.app.service.MessageReactionService;
 import com.chat.app.service.MessageService;
 
 @Controller
@@ -29,6 +32,8 @@ public class ChatController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @Autowired
+    private MessageReactionService messageReactionService;
 
     // =====================================================
     // SEND MESSAGE
@@ -636,5 +641,83 @@ public class ChatController {
         );
 
     }
+ // =====================================================
+ // MESSAGE REACTION
+ // =====================================================
+
+ @MessageMapping("/react")
+ public void reactToMessage(
+         ReactionEvent event,
+         Principal principal) {
+
+     String username =
+             principal.getName();
+
+     Message message =
+             messageService.getMessageById(
+                 event.getMessageId()
+             );
+
+     /*
+      * Add / update / remove reaction.
+      */
+     MessageReaction reaction =
+             messageReactionService.addReaction(
+                 event.getMessageId(),
+                 username,
+                 event.getReaction()
+             );
+
+     /*
+      * If the same reaction was clicked again,
+      * it was removed.
+      */
+     String reactionValue =
+             reaction != null
+                 ? reaction.getReaction()
+                 : null;
+
+     ReactionEvent response =
+             new ReactionEvent(
+
+                 event.getMessageId(),
+
+                 username,
+
+                 reactionValue,
+
+                 message.getSender()
+                        .getUsername(),
+
+                 message.getReceiver()
+                        .getUsername()
+             );
+
+     /*
+      * Send reaction to sender.
+      */
+     messagingTemplate.convertAndSendToUser(
+
+         message.getSender()
+                .getUsername(),
+
+         "/queue/reaction",
+
+         response
+     );
+
+     /*
+      * Send reaction to receiver.
+      */
+     messagingTemplate.convertAndSendToUser(
+
+         message.getReceiver()
+                .getUsername(),
+
+         "/queue/reaction",
+
+         response
+     );
+ }
 
 }

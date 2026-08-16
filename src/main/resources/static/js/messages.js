@@ -1227,168 +1227,167 @@ function appendMessage(
     "
 >
 
-                <!-- REPLY: BOTH -->
+<!-- REPLY: BOTH SENDER + RECEIVER -->
 
-                <button
-                    type="button"
+<button
+    type="button"
+    onclick="
+        event.stopPropagation();
 
-                    onclick="
-                        event.stopPropagation();
+        replyToMessage(
+            ${message.id}
+        );
+    "
+    style="
+        display:block;
+        width:100%;
+        padding:11px 12px;
+        border:none;
+        background:white;
+        text-align:left;
+        cursor:pointer;
+        font-size:14px;
+    "
+>
+    ↩ Reply
+</button>
 
-                        replyToMessage(
-                            ${message.id}
-                        );
-                    "
+<!-- REACT: BOTH SENDER + RECEIVER -->
 
-                    style="
-                        display:block;
-                        width:100%;
-                        padding:11px 12px;
-                        border:none;
-                        background:white;
-                        text-align:left;
-                        cursor:pointer;
-                        font-size:14px;
-                    "
-                >
+<button
+    type="button"
+    onclick="
+        event.stopPropagation();
 
-                    ↩ Reply
+        showReactionPicker(
+            ${message.id}
+        );
 
-                </button>
-
-
-                ${isMyMessage
-			?
-
-			`
-
-                    <!-- EDIT: SENDER ONLY -->
-
-                    <button
-                        type="button"
-
-                        onclick="
-                            event.stopPropagation();
-
-                            editMessage(
-                                ${message.id}
-                            );
-                        "
-
-                        style="
-                            display:block;
-                            width:100%;
-                            padding:11px 12px;
-                            border:none;
-                            background:white;
-                            text-align:left;
-                            cursor:pointer;
-                            font-size:14px;
-                        "
-                    >
-
-                        ✏️ Edit
-
-                    </button>
+        closeAllMessageMenus();
+    "
+    style="
+        display:block;
+        width:100%;
+        padding:11px 12px;
+        border:none;
+        background:white;
+        text-align:left;
+        cursor:pointer;
+        font-size:14px;
+    "
+>
+    😊 React
+</button>
 
 
-                    <!-- DELETE FOR ME -->
+${isMyMessage
+    ?
+    `
+        <!-- EDIT: SENDER ONLY -->
 
-                    <button
-                        type="button"
+        <button
+            type="button"
+            onclick="
+                event.stopPropagation();
 
-                        onclick="
-                            event.stopPropagation();
-
-                            deleteMessage(
-                                ${message.id}
-                            );
-                        "
-
-                        style="
-                            display:block;
-                            width:100%;
-                            padding:11px 12px;
-                            border:none;
-                            background:white;
-                            text-align:left;
-                            cursor:pointer;
-                            font-size:14px;
-                        "
-                    >
-
-                        🗑 Delete For Me
-
-                    </button>
+                editMessage(
+                    ${message.id}
+                );
+            "
+            style="
+                display:block;
+                width:100%;
+                padding:11px 12px;
+                border:none;
+                background:white;
+                text-align:left;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            ✏️ Edit
+        </button>
 
 
-                    <!-- DELETE FOR EVERYONE -->
+        <!-- DELETE FOR ME -->
 
-                    <button
-                        type="button"
+        <button
+            type="button"
+            onclick="
+                event.stopPropagation();
 
-                        onclick="
-                            event.stopPropagation();
+                deleteMessage(
+                    ${message.id}
+                );
+            "
+            style="
+                display:block;
+                width:100%;
+                padding:11px 12px;
+                border:none;
+                background:white;
+                text-align:left;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            🗑 Delete For Me
+        </button>
 
-                            deleteForEveryone(
-                                ${message.id}
-                            );
-                        "
 
-                        style="
-                            display:block;
-                            width:100%;
-                            padding:11px 12px;
-                            border:none;
-                            background:white;
-                            text-align:left;
-                            cursor:pointer;
-                            font-size:14px;
-                        "
-                    >
+        <!-- DELETE FOR EVERYONE -->
 
-                        🗑 Delete For Everyone
+        <button
+            type="button"
+            onclick="
+                event.stopPropagation();
 
-                    </button>
+                deleteForEveryone(
+                    ${message.id}
+                );
+            "
+            style="
+                display:block;
+                width:100%;
+                padding:11px 12px;
+                border:none;
+                background:white;
+                text-align:left;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            🗑 Delete For Everyone
+        </button>
+    `
+    :
+    `
+        <!-- RECEIVER -->
 
-                    `
+        <button
+            type="button"
+            onclick="
+                event.stopPropagation();
 
-			:
-
-			`
-
-                    <!-- RECEIVER -->
-
-                    <button
-                        type="button"
-
-                        onclick="
-                            event.stopPropagation();
-
-                            deleteMessage(
-                                ${message.id}
-                            );
-                        "
-
-                        style="
-                            display:block;
-                            width:100%;
-                            padding:11px 12px;
-                            border:none;
-                            background:white;
-                            text-align:left;
-                            cursor:pointer;
-                            font-size:14px;
-                        "
-                    >
-
-                        🗑 Delete For Me
-
-                    </button>
-
-                    `
-
-		}
+                deleteMessage(
+                    ${message.id}
+                );
+            "
+            style="
+                display:block;
+                width:100%;
+                padding:11px 12px;
+                border:none;
+                background:white;
+                text-align:left;
+                cursor:pointer;
+                font-size:14px;
+            "
+        >
+            🗑 Delete For Me
+        </button>
+    `
+}
 
             </div>
 
@@ -5057,4 +5056,553 @@ function sendSelectedGeneralFile() {
         }
     );
 
+}
+
+
+/* =====================================================
+   REACTION PICKER
+===================================================== */
+function showReactionPicker(messageId) {
+
+    closeReactionPicker();
+
+    const picker =
+        document.createElement("div");
+
+    picker.id = "reaction-picker";
+
+    picker.style.position = "fixed";
+    picker.style.zIndex = "999999";
+    picker.style.background = "#ffffff";
+    picker.style.border = "1px solid #ddd";
+    picker.style.borderRadius = "22px";
+    picker.style.padding = "6px 8px";
+    picker.style.boxShadow =
+        "0 4px 15px rgba(0,0,0,.25)";
+
+    picker.innerHTML = `
+
+        <button
+            class="quick-reaction"
+            onclick="sendReaction(${messageId}, '👍')"
+        >
+            👍
+        </button>
+
+        <button
+            class="quick-reaction"
+            onclick="sendReaction(${messageId}, '❤️')"
+        >
+            ❤️
+        </button>
+
+        <button
+            class="quick-reaction"
+            onclick="sendReaction(${messageId}, '😂')"
+        >
+            😂
+        </button>
+
+        <button
+            class="quick-reaction"
+            onclick="sendReaction(${messageId}, '😮')"
+        >
+            😮
+        </button>
+
+        <button
+            class="quick-reaction"
+            onclick="sendReaction(${messageId}, '😢')"
+        >
+            😢
+        </button>
+
+        <!-- PLUS -->
+        <button
+            class="quick-reaction"
+            onclick="
+                event.stopPropagation();
+                showAllEmojiPicker(${messageId});
+            "
+        >
+            ➕
+        </button>
+    `;
+
+    document.body.appendChild(picker);
+
+    picker
+        .querySelectorAll(".quick-reaction")
+        .forEach(button => {
+
+            button.style.border = "none";
+            button.style.background = "transparent";
+            button.style.cursor = "pointer";
+            button.style.fontSize = "21px";
+            button.style.padding = "4px 5px";
+
+        });
+
+
+    const messageElement =
+        document.getElementById(
+            "message-" + messageId
+        );
+
+    if (messageElement) {
+
+        const rect =
+            messageElement.getBoundingClientRect();
+
+        picker.style.left =
+            Math.max(
+                10,
+                rect.left
+            ) + "px";
+
+        picker.style.top =
+            Math.max(
+                10,
+                rect.top - 55
+            ) + "px";
+    }
+}
+
+
+function showAllEmojiPicker(messageId) {
+
+    closeReactionPicker();
+
+    const picker =
+        document.createElement("div");
+
+    picker.id = "reaction-picker";
+
+    picker.style.position = "fixed";
+    picker.style.zIndex = "999999";
+    picker.style.width = "320px";
+    picker.style.maxWidth =
+        "calc(100vw - 30px)";
+    picker.style.maxHeight = "300px";
+    picker.style.overflowY = "auto";
+    picker.style.background = "#ffffff";
+    picker.style.border = "1px solid #ddd";
+    picker.style.borderRadius = "12px";
+    picker.style.padding = "10px";
+    picker.style.boxShadow =
+        "0 4px 15px rgba(0,0,0,.25)";
+
+
+    const emojis = [
+
+        // Smileys
+        "😀","😃","😄","😁","😆","😅",
+        "😂","🤣","😊","😇","🙂","🙃",
+        "😉","😌","😍","🥰","😘","😗",
+        "😙","😚","😋","😛","😝","😜",
+        "🤪","🤨","🧐","🤓","😎","🤩",
+        "🥳","😏","😒","😞","😔","😟",
+        "😕","🙁","☹️","😣","😖","😫",
+        "😩","🥺","😢","😭","😤","😠",
+        "😡","🤬","🤯","😳","🥵","🥶",
+        "😱","😨","😰","😥","😓","🤗",
+        "🤔","🫡","🤭","🤫","🤥","😶",
+        "😐","😑","😬","🙄","😯","😦",
+        "😧","😮","😲","🥱","😴","🤤",
+        "😪","😵","🤐","🥴","🤢","🤮",
+
+        // Hands
+        "👍","👎","👌","✌️","🤞","🤟",
+        "🤘","🤙","👋","👏","🙌","👐",
+        "🤲","🙏","💪","🫶","☝️","👇",
+        "👆","👉","👈","✋","🤚","🖐️",
+        "🖖","👊","✊",
+
+        // Hearts
+        "❤️","🧡","💛","💚","💙","💜",
+        "🖤","🤍","🤎","💔","❣️","💕",
+        "💞","💓","💗","💖","💘","💝",
+        "💟","❤️‍🔥",
+
+        // Objects / symbols
+        "🔥","⭐","🌟","✨","💯","🎉",
+        "🎊","🎁","🏆","🥇","🚀","💡",
+        "💰","💎","⚡","☀️","🌈",
+        "☕","🍕","🍔","🍎","🍺",
+        "⚽","🏏","🎮","🎵","🎶",
+
+        // Animals
+        "🐶","🐱","🐭","🐹","🐰","🦊",
+        "🐻","🐼","🐨","🐯","🦁","🐮",
+        "🐷","🐸","🐵","🙈","🙉","🙊",
+        "🐔","🐧","🐦","🦄","🐝",
+        "🦋","🐢","🐍","🐬","🐳"
+
+    ];
+
+
+    picker.innerHTML = `
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:
+                    repeat(8, 1fr);
+                gap:4px;
+            "
+        >
+
+            ${emojis.map(
+                emoji => `
+
+                    <button
+                        onclick="
+                            sendReaction(
+                                ${messageId},
+                                '${emoji}'
+                            )
+                        "
+                        style="
+                            border:none;
+                            background:transparent;
+                            cursor:pointer;
+                            font-size:23px;
+                            padding:5px;
+                            border-radius:6px;
+                        "
+                        onmouseover="
+                            this.style.background='#f0f0f0'
+                        "
+                        onmouseout="
+                            this.style.background='transparent'
+                        "
+                    >
+                        ${emoji}
+                    </button>
+
+                `
+            ).join("")}
+
+        </div>
+    `;
+
+
+    document.body.appendChild(picker);
+
+
+    const messageElement =
+        document.getElementById(
+            "message-" + messageId
+        );
+
+
+    if (messageElement) {
+
+        const rect =
+            messageElement.getBoundingClientRect();
+
+        let left =
+            rect.left;
+
+        let top =
+            rect.top - 310;
+
+
+        if (top < 10) {
+
+            top =
+                rect.bottom + 10;
+
+        }
+
+
+        if (
+            left + 320 >
+            window.innerWidth
+        ) {
+
+            left =
+                window.innerWidth - 330;
+
+        }
+
+
+        picker.style.left =
+            Math.max(
+                10,
+                left
+            ) + "px";
+
+        picker.style.top =
+            Math.max(
+                10,
+                top
+            ) + "px";
+    }
+}
+
+/* =====================================================
+   MESSAGE REACTIONS
+   ===================================================== */
+
+/*
+ * SEND REACTION
+ *
+ * Works for BOTH:
+ * - Sender
+ * - Receiver
+ */
+function sendReaction(messageId, reaction) {
+
+    if (!messageId) {
+        console.error("Reaction message ID is missing");
+        return;
+    }
+
+    if (!reaction) {
+        console.error("Reaction is missing");
+        return;
+    }
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+        console.error(
+            "WebSocket is not connected"
+        );
+
+        return;
+    }
+
+    console.log(
+        "Sending reaction:",
+        messageId,
+        reaction
+    );
+
+    stompClient.send(
+        "/app/react",
+        {},
+        JSON.stringify({
+
+            messageId:
+                Number(messageId),
+
+            reaction:
+                reaction
+
+        })
+    );
+
+    /*
+     * Close emoji picker after selection.
+     */
+    closeReactionPicker();
+}
+
+
+/*
+ * CLOSE REACTION PICKER
+ */
+function closeReactionPicker() {
+
+    const picker =
+        document.getElementById(
+            "reaction-picker"
+        );
+
+    if (picker) {
+
+        picker.remove();
+
+    }
+}
+
+
+/*
+ * UPDATE REACTION UI
+ */
+function updateMessageReaction(
+    reactionEvent
+) {
+
+    if (!reactionEvent) {
+        return;
+    }
+
+    const messageId =
+        reactionEvent.messageId;
+
+    if (!messageId) {
+        return;
+    }
+
+    console.log(
+        "Reaction received:",
+        reactionEvent
+    );
+
+
+    /*
+     * Store reaction information.
+     */
+    if (
+        typeof messageStore !==
+        "undefined"
+    ) {
+
+        if (
+            messageStore[messageId]
+        ) {
+
+            messageStore[
+                messageId
+            ].reaction =
+                reactionEvent.reaction;
+
+            messageStore[
+                messageId
+            ].reactionUser =
+                reactionEvent.username;
+        }
+    }
+
+
+    /*
+     * Find message element.
+     */
+    const messageElement =
+        document.getElementById(
+            "message-" + messageId
+        );
+
+    if (!messageElement) {
+
+        console.warn(
+            "Message element not found:",
+            messageId
+        );
+
+        return;
+    }
+
+
+    /*
+     * Find/create reaction display.
+     */
+    let reactionDisplay =
+        document.getElementById(
+            "reaction-display-" +
+            messageId
+        );
+
+
+    /*
+     * Reaction removed.
+     */
+    if (
+        !reactionEvent.reaction
+    ) {
+
+        if (reactionDisplay) {
+
+            reactionDisplay.remove();
+
+        }
+
+        return;
+    }
+
+
+    /*
+     * Create reaction display
+     * if it doesn't exist.
+     */
+    if (!reactionDisplay) {
+
+        reactionDisplay =
+            document.createElement(
+                "div"
+            );
+
+        reactionDisplay.id =
+            "reaction-display-" +
+            messageId;
+
+       reactionDisplay.style.position =
+    "absolute";
+
+reactionDisplay.style.bottom =
+    "-10px";
+
+
+const storedMessage =
+    messageStore[messageId];
+
+const isMyReactionMessage =
+    storedMessage &&
+    storedMessage.sender ===
+        loggedInUser;
+
+
+if (isMyReactionMessage) {
+
+    reactionDisplay.style.left =
+        "auto";
+
+    reactionDisplay.style.right =
+        "10px";
+
+}
+else {
+
+    reactionDisplay.style.right =
+        "auto";
+
+    reactionDisplay.style.left =
+        "10px";
+
+}
+
+
+reactionDisplay.style.background =
+    "#ffffff";
+
+reactionDisplay.style.border =
+    "1px solid #ddd";
+
+reactionDisplay.style.borderRadius =
+    "12px";
+
+        /*
+         * Make message container
+         * position relative.
+         */
+        const computed =
+            window.getComputedStyle(
+                messageElement
+            );
+
+        if (
+            computed.position ===
+                "static"
+        ) {
+
+            messageElement.style.position =
+                "relative";
+        }
+
+
+        messageElement.appendChild(
+            reactionDisplay
+        );
+    }
+
+
+    /*
+     * Display selected emoji.
+     */
+    reactionDisplay.textContent =
+        reactionEvent.reaction;
 }

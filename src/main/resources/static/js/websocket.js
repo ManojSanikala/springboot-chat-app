@@ -269,6 +269,8 @@ function connectWebSocket() {
             subscribeToDelete();
 
             subscribeToEdit();
+            
+            subscribeToReaction();
 
 
             console.log(
@@ -545,31 +547,28 @@ function subscribeToMessages() {
                         );
 
                     }
-                    /* =================================================
-   IN-APP NOTIFICATION
-   -------------------------------------------------
-   Only notify when:
-   - Message belongs to logged-in user
-   - Sender is NOT current chat
-================================================= */
-
-if (
-    msg.receiver ===
-        loggedInUser &&
-
-    msg.sender !==
-        currentChatUser
-) {
-
-    showMessageNotification(
-        msg.sender,
-        msg.content,
-        msg.sender
-    );
-
-}
-
                 }
+
+            }
+
+
+            /*
+             * Notify only for a message from another chat.
+             * This is deliberately outside the current-chat display
+             * block above, otherwise it can never run.
+             */
+            if (
+                msg.receiver === loggedInUser &&
+                msg.sender !== currentChatUser &&
+                typeof showMessageNotification === "function"
+            ) {
+
+                showMessageNotification(
+                    msg.sender,
+                    msg.content,
+                    msg.sender,
+                    msg.messageType
+                );
 
             }
 
@@ -758,12 +757,15 @@ function subscribeToTyping() {
                  */
 
                 if (
-                    typing.sender !==
-                    currentChatUser
+                    !currentChatUser ||
+                    typing.sender !== currentChatUser
                 ) {
 
                     typingDiv.innerHTML =
                         "";
+
+                    typingDiv.style.display =
+                        "none";
 
                     return;
 
@@ -774,6 +776,9 @@ function subscribeToTyping() {
                     typing.typing ===
                     true
                 ) {
+
+                    typingDiv.style.display =
+                        "block";
 
                     typingDiv.innerHTML = `
 
@@ -797,6 +802,9 @@ function subscribeToTyping() {
 
                     typingDiv.innerHTML =
                         "";
+
+                    typingDiv.style.display =
+                        "none";
 
                 }
 
@@ -1651,7 +1659,8 @@ let messageNotificationTimer = null;
 function showMessageNotification(
     sender,
     content,
-    username
+    username,
+    messageType
 ) {
 
     const notification =
@@ -1704,14 +1713,14 @@ function showMessageNotification(
      * Image message
      */
 
-    if (
-        typeof preview === "string" &&
-        preview.startsWith("/uploads/")
-    ) {
-
-        preview =
-            "📷 Image";
-
+    if (messageType === "IMAGE") {
+        preview = "📷 Image";
+    }
+    else if (messageType === "AUDIO") {
+        preview = "🎤 Voice message";
+    }
+    else if (messageType === "FILE") {
+        preview = "📎 File";
     }
 
 
@@ -1836,4 +1845,87 @@ function hideMessageNotification() {
 
     }
 
+}
+
+
+/* =====================================================
+   MESSAGE REACTION
+===================================================== */
+
+function subscribeToReaction() {
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+        return;
+    }
+
+    stompClient.subscribe(
+        "/user/queue/reaction",
+        function (message) {
+
+            let reaction;
+
+            try {
+
+                reaction =
+                    JSON.parse(
+                        message.body
+                    );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Invalid reaction event:",
+                    message.body
+                );
+
+                return;
+            }
+
+
+            /*
+             * Update messageStore
+             */
+            if (
+                typeof messageStore !==
+                "undefined"
+            ) {
+
+                if (
+                    messageStore[
+                        reaction.messageId
+                    ]
+                ) {
+
+                    messageStore[
+                        reaction.messageId
+                    ].reaction =
+                        reaction.reaction;
+
+                    messageStore[
+                        reaction.messageId
+                    ].reactionUser =
+                        reaction.username;
+                }
+            }
+
+
+            /*
+             * Update message UI
+             */
+            if (
+                typeof updateMessageReaction ===
+                "function"
+            ) {
+
+                updateMessageReaction(
+                    reaction
+                );
+            }
+
+        }
+    );
 }

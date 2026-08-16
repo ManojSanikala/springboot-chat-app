@@ -518,6 +518,40 @@ function updateUnreadBadge(
    SELECT USER
 ===================================================== */
 
+function setChatControlsEnabled(enabled) {
+
+    const controls = [
+        "message",
+        "attachmentButton",
+        "micButton",
+        "sendButton"
+    ];
+
+    controls.forEach(function(controlId) {
+
+        const control =
+            document.getElementById(controlId);
+
+        if (!control) {
+            return;
+        }
+
+        control.disabled = !enabled;
+        control.style.opacity = enabled ? "1" : "0.55";
+        control.style.cursor = enabled ? "pointer" : "not-allowed";
+
+    });
+
+    const messageInput =
+        document.getElementById("message");
+
+    if (messageInput) {
+        messageInput.placeholder = enabled
+            ? "Type a message..."
+            : "Select a user to start chatting";
+    }
+}
+
 function selectUser(username) {
 
     console.log(
@@ -540,6 +574,19 @@ function selectUser(username) {
 
     currentChatUser =
         username;
+
+    setChatControlsEnabled(true);
+
+
+    const typingIndicator =
+        document.getElementById(
+            "typing"
+        );
+
+    if (typingIndicator) {
+        typingIndicator.innerHTML = "";
+        typingIndicator.style.display = "none";
+    }
 
 
     /*
@@ -638,6 +685,8 @@ function clearCurrentChat() {
 
     currentChatUser = "";
 
+    setChatControlsEnabled(false);
+
 
     let chatWith =
         document.getElementById(
@@ -664,6 +713,9 @@ function clearCurrentChat() {
         typing.innerHTML =
             "";
 
+        typing.style.display =
+            "none";
+
     }
 
 }
@@ -676,6 +728,18 @@ function clearCurrentChat() {
 document.addEventListener(
     "DOMContentLoaded",
     function () {
+
+        const typingIndicator =
+            document.getElementById(
+                "typing"
+            );
+
+        if (typingIndicator) {
+            typingIndicator.innerHTML = "";
+            typingIndicator.style.display = "none";
+        }
+
+        setChatControlsEnabled(false);
 
         loadCurrentUser();
 
