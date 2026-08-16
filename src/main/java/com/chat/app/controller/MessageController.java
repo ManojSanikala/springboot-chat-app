@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.chat.app.dto.ChatHistoryResponse;
@@ -88,6 +89,7 @@ public class MessageController {
         return ResponseEntity.ok(conversation);
     }
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Message>> getMessages() {
 
         List<Message> messages = messageService.getAllMessages();
@@ -96,6 +98,7 @@ public class MessageController {
     }
     
     @GetMapping("/history")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<ChatHistoryResponse> getChatHistory(){
     	return messageService.getChatHistory();
     }

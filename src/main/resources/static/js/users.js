@@ -534,71 +534,34 @@ function selectUser(username) {
     );
 
 
+    /*
+     * Set current chat
+     */
+
     currentChatUser =
         username;
 
 
-    document.getElementById(
-        "chatWith"
-    ).innerHTML =
-        "Chat with " + username;
-
-
     /*
-     * LOAD OLD MESSAGES
+     * Update chat header
      */
 
-    loadConversation(
-        username
-    );
-
-
-    /*
-     * MARK MESSAGES READ
-     */
-
-    markAsRead();
-
-
-    /*
-     * REMOVE UNREAD BADGE
-     */
-
-    const badge =
+    const chatWith =
         document.getElementById(
-            "badge-" + username
+            "chatWith"
         );
 
+    if (chatWith) {
 
-    if (badge) {
-
-        badge.remove();
-
-    }
-
-}
-    /*
-     * Also clear badge container.
-     */
-
-    let badgeContainer =
-        document.getElementById(
-            "badge-container-" +
-            username
-        );
-
-
-    if (badgeContainer) {
-
-        badgeContainer.innerHTML =
-            "";
+        chatWith.innerHTML =
+            "Chat with " + username;
 
     }
 
 
-    /* =========================================
-       LOAD CHAT HISTORY
-    ========================================= */
+    /*
+     * Load chat history
+     */
 
     if (
         typeof loadConversation ===
@@ -610,7 +573,6 @@ function selectUser(username) {
         );
 
     }
-
     else {
 
         console.error(
@@ -620,9 +582,9 @@ function selectUser(username) {
     }
 
 
-    /* =========================================
-       MARK MESSAGES AS READ
-    ========================================= */
+    /*
+     * Mark messages as read
+     */
 
     if (
         typeof markAsRead ===
@@ -634,8 +596,40 @@ function selectUser(username) {
     }
 
 
+    /*
+     * Remove unread badge
+     */
+
+    const badge =
+        document.getElementById(
+            "badge-" + username
+        );
+
+    if (badge) {
+
+        badge.remove();
+
+    }
 
 
+    /*
+     * Clear badge container
+     */
+
+    const badgeContainer =
+        document.getElementById(
+            "badge-container-" +
+            username
+        );
+
+    if (badgeContainer) {
+
+        badgeContainer.innerHTML =
+            "";
+
+    }
+
+}
 /* =====================================================
    CLEAR CURRENT CHAT
 ===================================================== */

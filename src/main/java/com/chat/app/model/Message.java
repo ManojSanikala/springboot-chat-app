@@ -44,6 +44,7 @@ public class Message {
     private Long replyToMessageId;
 
     private String replyToContent;
+    private String fileName;
 
     /*
      * =====================================================
@@ -271,4 +272,11 @@ public class Message {
         this.messageType = messageType;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 }

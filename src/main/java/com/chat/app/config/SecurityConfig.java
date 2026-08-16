@@ -3,7 +3,6 @@ package com.chat.app.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -76,8 +75,12 @@ public class SecurityConfig {
                     "/images/**",
                     "/favicon.ico",
 
+                    // Message attachments are rendered by standard browser URLs.
+                    // Upload endpoints remain protected by the authenticated default rule.
                     "/uploads/images/**",
+                    "/uploads/files/**",
                     "/auth/login",
+                    "/auth/register",
 
                     "/chat/**"
                 )

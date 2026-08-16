@@ -10,26 +10,54 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class FileUploadConfig
         implements WebMvcConfigurer {
 
-    @Override
-    public void addResourceHandlers(
-            ResourceHandlerRegistry registry) {
-
-        String uploadPath =
-                Paths.get(
-                    "uploads/images"
-                )
-                .toAbsolutePath()
-                .toUri()
-                .toString();
+	@Override
+	public void addResourceHandlers(
+	        ResourceHandlerRegistry registry) {
 
 
-        registry
-            .addResourceHandler(
-                "/uploads/images/**"
-            )
-            .addResourceLocations(
-                uploadPath
-            );
+	    // =====================================================
+	    // IMAGE UPLOADS
+	    // =====================================================
 
+	    String imageUploadPath =
+	            Paths.get(
+	                "uploads/images"
+	            )
+	            .toAbsolutePath()
+	            .toUri()
+	            .toString();
+
+
+	    registry
+	        .addResourceHandler(
+	            "/uploads/images/**"
+	        )
+	        .addResourceLocations(
+	            imageUploadPath
+	        );
+
+
+	    // =====================================================
+	    // GENERAL FILE UPLOADS
+	    // =====================================================
+
+	    String fileUploadPath =
+	            Paths.get(
+	                "uploads/files"
+	            )
+	            .toAbsolutePath()
+	            .toUri()
+	            .toString();
+
+
+	    registry
+	        .addResourceHandler(
+	            "/uploads/files/**"
+	        )
+	        .addResourceLocations(
+	            fileUploadPath
+	        );
+
+	
     }
 }

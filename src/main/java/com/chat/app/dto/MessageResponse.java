@@ -34,6 +34,7 @@ public class MessageResponse {
      */
     private String messageType = "TEXT";
 
+    private String fileName;
 
     /*
      * =====================================================
@@ -238,6 +239,14 @@ public class MessageResponse {
                 messageType != null
                         ? messageType
                         : "TEXT";
+    }
+    
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

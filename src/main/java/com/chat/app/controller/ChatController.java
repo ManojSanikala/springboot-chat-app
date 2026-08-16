@@ -68,7 +68,9 @@ public class ChatController {
 
                     message.getReplyToContent(),
 
-                    message.getMessageType()
+                    message.getMessageType(),
+
+                    message.getFileName()
 
                 );
 
@@ -103,9 +105,12 @@ public class ChatController {
                     savedMessage.getReplyToContent(),
 
                     savedMessage.getMessageType()
-
                 );
 
+
+        response.setFileName(
+            savedMessage.getFileName()
+        );
 
         // =================================================
         // Send message to Receiver

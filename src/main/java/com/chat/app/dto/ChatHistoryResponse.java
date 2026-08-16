@@ -31,6 +31,8 @@ public class ChatHistoryResponse {
      * FILE
      */
     private String messageType = "TEXT";
+    
+    private String fileName;
 
 
     public ChatHistoryResponse() {
@@ -159,6 +161,14 @@ public class ChatHistoryResponse {
                 messageType != null
                         ? messageType
                         : "TEXT";
+    }
+    
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

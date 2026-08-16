@@ -11,6 +11,7 @@ public class ChatMessage {
     private Long replyToMessageId;
 
     private String replyToContent;
+    private String fileName;
 
     /*
      * =====================================================
@@ -156,5 +157,13 @@ public class ChatMessage {
         this.messageType =
                 messageType;
     }
+    
+    public String getFileName() {
+        return fileName;
+    }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+
+}
 }

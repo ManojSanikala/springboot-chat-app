@@ -8,6 +8,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -45,6 +46,10 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 UserDetails userDetails =
                         customUserDetailsService.loadUserByUsername(username);
 
+                if (!jwtService.isTokenValid(token, userDetails.getUsername())) {
+                    throw new AuthenticationCredentialsNotFoundException("WebSocket token is invalid or expired");
+                }
+
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -56,6 +61,8 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
 
                 // Update user online in database
                 userService.updateOnlineStatus(username, true);
+            } else {
+                throw new AuthenticationCredentialsNotFoundException("WebSocket authentication token is required");
             }
         }
 

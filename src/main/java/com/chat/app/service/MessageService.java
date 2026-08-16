@@ -14,7 +14,6 @@ import com.chat.app.exception.UserNotFoundException;
 import com.chat.app.model.Message;
 import com.chat.app.model.User;
 import com.chat.app.repository.MessageRepository;
-
 import com.chat.app.repository.UserRepository;
 
 @Service
@@ -136,12 +135,13 @@ public class MessageService {
     // =====================================================
 
     public Message savePrivateMessage(
-            String senderUsername,
+    		String senderUsername,
             String receiverUsername,
             String content,
             Long replyToMessageId,
             String replyToContent,
-            String messageType) {
+            String messageType,
+            String fileName) {
 
 
         User sender =
@@ -223,6 +223,9 @@ public class MessageService {
             message.setMessageType(
                 messageType.toUpperCase()
             );
+            message.setFileName(
+            	    fileName
+            	);
 
         }
 
@@ -340,37 +343,41 @@ public class MessageService {
                     "MESSAGE ID : "
                     + message.getId()
                     + " | FROM : "
-                    + message.getSender()
-                              .getUsername()
+                    + message.getSender().getUsername()
                     + " | CONTENT : "
                     + message.getContent()
                 );
 
+                ChatHistoryResponse response =
+                        new ChatHistoryResponse(
 
-                return new ChatHistoryResponse(
+                            message.getId(),
 
-                    message.getId(),
+                            message.getSender()
+                                   .getUsername(),
 
-                    message.getSender()
-                           .getUsername(),
+                            message.getContent(),
 
-                    message.getContent(),
+                            message.getTimestamp(),
 
-                    message.getTimestamp(),
+                            message.getStatus(),
 
-                    message.getStatus(),
+                            message.isEdited(),
 
-                    message.isEdited(),
+                            message.getReplyToMessageId(),
 
-                    message.getReplyToMessageId(),
+                            message.getReplyToContent(),
 
-                    message.getReplyToContent(),
+                            message.getMessageType()
+                        );
 
-                    message.getMessageType()
+                response.setFileName(
+                    message.getFileName()
                 );
 
-            })
+                return response;
 
+            })
 
             .toList();
     }
@@ -472,30 +479,38 @@ public class MessageService {
             .findAll()
             .stream()
 
-            .map(message ->
-                new ChatHistoryResponse(
+            .map(message -> {
 
-                    message.getId(),
+                ChatHistoryResponse response =
+                        new ChatHistoryResponse(
 
-                    message.getSender()
-                           .getUsername(),
+                            message.getId(),
 
-                    message.getContent(),
+                            message.getSender()
+                                   .getUsername(),
 
-                    message.getTimestamp(),
+                            message.getContent(),
 
-                    message.getStatus(),
+                            message.getTimestamp(),
 
-                    message.isEdited(),
+                            message.getStatus(),
 
-                    message.getReplyToMessageId(),
+                            message.isEdited(),
 
-                    message.getReplyToContent(),
+                            message.getReplyToMessageId(),
 
-                    message.getMessageType()
+                            message.getReplyToContent(),
 
-                )
-            )
+                            message.getMessageType()
+                        );
+
+                response.setFileName(
+                    message.getFileName()
+                );
+
+                return response;
+
+            })
 
             .collect(
                 Collectors.toList()

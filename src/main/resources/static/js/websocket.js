@@ -29,6 +29,112 @@ const MAX_RECONNECT_DELAY = 30000;
 
 
 /* =====================================================
+   SESSION EXPIRED / INVALID JWT
+===================================================== */
+
+function handleSessionExpired() {
+
+    console.warn(
+        "JWT expired or invalid. Logging out..."
+    );
+
+
+    /*
+     * Stop reconnect timer
+     */
+
+    if (reconnectTimer) {
+
+        clearTimeout(
+            reconnectTimer
+        );
+
+        reconnectTimer = null;
+    }
+
+
+    /*
+     * Stop reconnect attempts
+     */
+
+    reconnectAttempts = 0;
+
+
+    /*
+     * Disconnect STOMP
+     */
+
+    if (
+        stompClient &&
+        stompClient.connected
+    ) {
+
+        try {
+
+            stompClient.disconnect(
+                function () {
+
+                    console.log(
+                        "WebSocket disconnected because session expired."
+                    );
+
+                }
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "WebSocket disconnect error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    stompClient = null;
+
+
+    /*
+     * Remove JWT
+     */
+
+    localStorage.removeItem(
+        "token"
+    );
+
+
+    /*
+     * Remove current chat
+     */
+
+    localStorage.removeItem(
+        "currentChatUser"
+    );
+
+
+    /*
+     * Redirect to login
+     */
+
+    if (
+        !window.location.pathname
+            .endsWith(
+                "/login.html"
+            )
+    ) {
+
+        window.location.replace(
+            "/login.html"
+        );
+
+    }
+
+}
+
+/* =====================================================
    CONNECT WEBSOCKET
 ===================================================== */
 
@@ -172,20 +278,50 @@ function connectWebSocket() {
         },
 
 
-        function (error) {
+       function (error) {
 
-            console.error(
-                "WebSocket connection error:",
-                error
-            );
-
-
-            stompClient = null;
+    console.error(
+        "WebSocket connection error:",
+        error
+    );
 
 
-            scheduleReconnect();
+    /*
+     * If the server rejected the
+     * connection because JWT is invalid,
+     * stop reconnecting and logout.
+     */
 
-        }
+    const errorText =
+        JSON.stringify(error)
+            .toLowerCase();
+
+
+    if (
+        errorText.includes("401") ||
+        errorText.includes("403") ||
+        errorText.includes("unauthorized") ||
+        errorText.includes("forbidden") ||
+        errorText.includes("expired") ||
+        errorText.includes("invalid")
+    ) {
+
+        handleSessionExpired();
+
+        return;
+    }
+
+
+    /*
+     * Normal network problem.
+     * Keep existing reconnect behaviour.
+     */
+
+    stompClient = null;
+
+    scheduleReconnect();
+
+}
 
     );
 
@@ -194,21 +330,36 @@ function connectWebSocket() {
      * SockJS close
      */
 
-    socket.onclose =
-        function () {
+    socket.onclose = function () {
 
-            console.warn(
-                "WebSocket connection closed."
-            );
-
-
-            stompClient = null;
+    console.warn(
+        "WebSocket connection closed."
+    );
 
 
-            scheduleReconnect();
+    stompClient = null;
 
-        };
 
+    /*
+     * Do not reconnect if user
+     * has already logged out.
+     */
+
+    const token =
+        localStorage.getItem(
+            "token"
+        );
+
+
+    if (!token) {
+
+        return;
+    }
+
+
+    scheduleReconnect();
+
+};
 }
 
 
@@ -394,6 +545,29 @@ function subscribeToMessages() {
                         );
 
                     }
+                    /* =================================================
+   IN-APP NOTIFICATION
+   -------------------------------------------------
+   Only notify when:
+   - Message belongs to logged-in user
+   - Sender is NOT current chat
+================================================= */
+
+if (
+    msg.receiver ===
+        loggedInUser &&
+
+    msg.sender !==
+        currentChatUser
+) {
+
+    showMessageNotification(
+        msg.sender,
+        msg.content,
+        msg.sender
+    );
+
+}
 
                 }
 
@@ -1460,5 +1634,206 @@ function isWebSocketConnected() {
         true
 
     );
+
+}
+
+/* =====================================================
+   REAL-TIME IN-APP MESSAGE NOTIFICATION
+===================================================== */
+
+let messageNotificationTimer = null;
+
+
+/* =====================================================
+   SHOW MESSAGE NOTIFICATION
+===================================================== */
+
+function showMessageNotification(
+    sender,
+    content,
+    username
+) {
+
+    const notification =
+        document.getElementById(
+            "messageNotification"
+        );
+
+    const senderElement =
+        document.getElementById(
+            "messageNotificationSender"
+        );
+
+    const contentElement =
+        document.getElementById(
+            "messageNotificationContent"
+        );
+
+
+    if (
+        !notification ||
+        !senderElement ||
+        !contentElement
+    ) {
+
+        console.warn(
+            "Message notification elements not found."
+        );
+
+        return;
+    }
+
+
+    /*
+     * Sender
+     */
+
+    senderElement.textContent =
+        sender;
+
+
+    /*
+     * Message preview
+     */
+
+    let preview =
+        content || "New message";
+
+
+    /*
+     * Image message
+     */
+
+    if (
+        typeof preview === "string" &&
+        preview.startsWith("/uploads/")
+    ) {
+
+        preview =
+            "📷 Image";
+
+    }
+
+
+    /*
+     * Limit preview length
+     */
+
+    if (
+        preview.length > 80
+    ) {
+
+        preview =
+            preview.substring(
+                0,
+                80
+            ) + "...";
+
+    }
+
+
+    contentElement.textContent =
+        preview;
+
+
+    /*
+     * Show notification
+     */
+
+    notification.style.display =
+        "block";
+
+
+    /*
+     * Clear previous timer
+     */
+
+    if (
+        messageNotificationTimer
+    ) {
+
+        clearTimeout(
+            messageNotificationTimer
+        );
+
+    }
+
+
+    /*
+     * Automatically hide
+     * after 4 seconds.
+     */
+
+    messageNotificationTimer =
+        setTimeout(
+            function() {
+
+                hideMessageNotification();
+
+            },
+            4000
+        );
+
+
+    /*
+     * Clicking notification
+     * opens that conversation.
+     */
+
+    notification.onclick =
+        function() {
+
+            if (
+                username &&
+                typeof selectUser ===
+                "function"
+            ) {
+
+                selectUser(
+                    username
+                );
+
+            }
+
+
+            hideMessageNotification();
+
+        };
+
+}
+
+
+/* =====================================================
+   HIDE MESSAGE NOTIFICATION
+===================================================== */
+
+function hideMessageNotification() {
+
+    const notification =
+        document.getElementById(
+            "messageNotification"
+        );
+
+
+    if (
+        messageNotificationTimer
+    ) {
+
+        clearTimeout(
+            messageNotificationTimer
+        );
+
+        messageNotificationTimer =
+            null;
+
+    }
+
+
+    if (notification) {
+
+        notification.style.display =
+            "none";
+
+    }
 
 }

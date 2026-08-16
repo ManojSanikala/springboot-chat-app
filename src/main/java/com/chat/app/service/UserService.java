@@ -36,6 +36,10 @@ public class UserService {
      */
     public UserResponse addUser(UserRequest request) {
 
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username is already in use");
+        }
+
         User user = new User();
 
         user.setUsername(request.getUsername());
