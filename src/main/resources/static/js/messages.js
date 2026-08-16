@@ -32,6 +32,195 @@ let userIsNearBottom = true;
 let newMessageCount = 0;
 
 let selectedImageFile = null;
+
+let selectedGeneralFile = null;
+
+let mediaRecorder = null;
+let recordedAudioChunks = [];
+
+/* =====================================================
+   JWT SESSION VALIDATION
+===================================================== */
+
+function isJwtExpired() {
+
+    const token =
+        localStorage.getItem("token");
+
+    if (!token) {
+
+        return true;
+    }
+
+    try {
+
+        const payload =
+            JSON.parse(
+                atob(
+                    token.split(".")[1]
+                )
+            );
+
+
+        /*
+         * JWT exp is in seconds.
+         * Date.now() is in milliseconds.
+         */
+
+        if (
+            !payload.exp
+        ) {
+
+            return true;
+        }
+
+
+        return (
+            payload.exp * 1000
+        ) <= Date.now();
+
+    }
+    catch (error) {
+
+        
+
+        return true;
+    }
+}
+
+
+/* =====================================================
+   HANDLE EXPIRED SESSION
+===================================================== */
+
+function handleExpiredSession() {
+
+    
+
+
+    /*
+     * Stop reconnect timer
+     */
+
+    if (
+        typeof reconnectTimer !==
+        "undefined" &&
+        reconnectTimer
+    ) {
+
+        clearTimeout(
+            reconnectTimer
+        );
+
+        reconnectTimer = null;
+    }
+
+
+    /*
+     * Disconnect WebSocket
+     */
+
+    if (
+        typeof stompClient !==
+            "undefined" &&
+        stompClient &&
+        stompClient.connected
+    ) {
+
+        try {
+
+            stompClient.disconnect();
+
+        }
+        catch (error) {
+
+            
+
+        }
+
+    }
+
+
+    /*
+     * Clear application session
+     */
+
+    localStorage.removeItem(
+        "token"
+    );
+
+    localStorage.removeItem(
+        "currentChatUser"
+    );
+
+    sessionStorage.clear();
+
+
+    /*
+     * Go to login page
+     */
+
+    if (
+        !window.location.pathname
+            .endsWith(
+                "/login.html"
+            )
+    ) {
+
+        window.location.replace(
+            "/login.html"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   PROTECT CHAT PAGE
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        /*
+         * Don't protect login page.
+         */
+
+        if (
+            window.location.pathname
+                .endsWith(
+                    "/login.html"
+                )
+        ) {
+
+            return;
+        }
+
+
+        /*
+         * No token OR expired token
+         */
+
+        if (
+            isJwtExpired()
+        ) {
+
+            handleExpiredSession();
+
+            return;
+        }
+
+
+        /*
+         * Token is currently valid.
+         */
+
+        
+
+    }
+);
 /* =====================================================
    SEND MESSAGE
 ===================================================== */
@@ -50,6 +239,10 @@ function sendMessage() {
 
         return;
     }
+    if (selectedGeneralFile) {
+    sendSelectedGeneralFile();
+    return;
+}
 
 	const receiver =
 		currentChatUser;
@@ -86,9 +279,7 @@ function sendMessage() {
 
 	if (!input) {
 
-		console.error(
-			"Message input not found."
-		);
+		
 
 		return;
 	}
@@ -233,14 +424,19 @@ document.addEventListener(
 
 						if (selectedImageFile) {
 
-							sendSelectedImage();
+    sendSelectedImage();
 
-						}
-						else {
+}
+else if (selectedGeneralFile) {
 
-							sendMessage();
+    sendSelectedGeneralFile();
 
-						}
+}
+else {
+
+    sendMessage();
+
+}
 
 					}
 
@@ -308,38 +504,30 @@ function loadConversation(
 	username
 ) {
 
-	console.log(
-		"================================="
-	);
+	
 
-	console.log(
-		"Loading chat history for:",
-		username
-	);
+	
 
-	console.log(
-		"================================="
-	);
+	
 
 
 	const token =
-		localStorage.getItem(
-			"token"
-		);
+    localStorage.getItem(
+        "token"
+    );
 
 
-	if (!token) {
+if (
+    !token ||
+    isJwtExpired()
+) {
 
-		console.error(
-			"JWT token not found."
-		);
+    
 
-		window.location.replace(
-			"/login.html"
-		);
+    handleExpiredSession();
 
-		return;
-	}
+    return;
+}
 
 
 	const url =
@@ -371,10 +559,7 @@ function loadConversation(
 		.then(
 			async function(response) {
 
-				console.log(
-					"History HTTP status:",
-					response.status
-				);
+				
 
 
 				const text =
@@ -383,18 +568,25 @@ function loadConversation(
 
 				if (!response.ok) {
 
-					console.error(
-						"History response:",
-						text
-					);
+    
 
 
-					throw new Error(
-						"Failed to load conversation. HTTP " +
-						response.status
-					);
+    if (
+        response.status === 401 ||
+        response.status === 403
+    ) {
 
-				}
+        handleExpiredSession();
+
+        return [];
+    }
+
+
+    throw new Error(
+        "Failed to load conversation. HTTP " +
+        response.status
+    );
+}
 
 
 				if (
@@ -415,10 +607,7 @@ function loadConversation(
 				}
 				catch (error) {
 
-					console.error(
-						"Invalid history JSON:",
-						text
-					);
+					
 
 					throw error;
 
@@ -430,10 +619,7 @@ function loadConversation(
 		.then(
 			function(messages) {
 
-				console.log(
-					"CHAT HISTORY RECEIVED:",
-					messages
-				);
+				
 
 
 				const chat =
@@ -444,9 +630,7 @@ function loadConversation(
 
 				if (!chat) {
 
-					console.error(
-						"#chat element not found."
-					);
+					
 
 					return;
 				}
@@ -567,10 +751,7 @@ function loadConversation(
 				markAsRead();
 
 
-				console.log(
-					"HISTORY LOADED:",
-					messages.length
-				);
+				
 
 			}
 		)
@@ -578,21 +759,13 @@ function loadConversation(
 		.catch(
 			function(error) {
 
-				console.error(
-					"================================="
-				);
+				
 
-				console.error(
-					"CHAT HISTORY ERROR"
-				);
+				
 
-				console.error(
-					error
-				);
+				
 
-				console.error(
-					"================================="
-				);
+				
 
 			}
 		);
@@ -619,9 +792,7 @@ function appendMessage(
 
 	if (!chat) {
 
-		console.error(
-			"#chat element not found."
-		);
+		
 
 		return;
 	}
@@ -1297,12 +1468,12 @@ function appendMessage(
     "
 >
 
-    ${message.messageType &&
-			message.messageType.toUpperCase() === "IMAGE"
+  ${message.messageType &&
+    message.messageType.toUpperCase() === "IMAGE"
 
-			?
+    ?
 
-			`
+    `
         <img
             src="${escapeHtml(message.content)}"
             alt="Image"
@@ -1323,14 +1494,78 @@ function appendMessage(
                 );
             "
         />
-        `
+    `
 
-			:
+    :
 
-			escapeHtml(
-				message.content
-			)
-		}
+    message.messageType &&
+    message.messageType.toUpperCase() === "AUDIO"
+
+    ?
+
+    `
+        <audio
+            controls
+            preload="metadata"
+            style="display:block; max-width:260px;"
+        >
+            <source
+                src="${escapeHtml(message.content)}"
+                type="audio/webm"
+            />
+            Your browser does not support audio playback.
+        </audio>
+    `
+
+    :
+
+    message.messageType &&
+    message.messageType.toUpperCase() === "FILE"
+
+    ?
+
+    `
+        <div
+            style="
+                display:flex;
+                flex-direction:column;
+                gap:7px;
+                padding:8px 10px;
+                background:#f5f5f5;
+                border:1px solid #ddd;
+                border-radius:8px;
+                color:#333;
+                font-size:14px;
+            "
+        >
+            📎 ${escapeHtml(message.fileName || "Download File")}
+
+            <span style="display:flex; gap:12px;">
+                <a
+                    href="${escapeHtml(message.content)}"
+                    target="_blank"
+                    rel="noopener"
+                    style="color:#1976d2; text-decoration:none;"
+                >
+                    Preview
+                </a>
+                <a
+                    href="${escapeHtml(message.content)}"
+                    download="${escapeHtml(message.fileName || "file")}" 
+                    style="color:#1976d2; text-decoration:none;"
+                >
+                    Download
+                </a>
+            </span>
+        </div>
+    `
+
+    :
+
+    escapeHtml(
+        message.content
+    )
+}
 
 
     ${message.edited
@@ -1714,10 +1949,7 @@ function replyToMessage(
 
 	if (!message) {
 
-		console.error(
-			"Message not found:",
-			messageId
-		);
+		
 
 		return;
 
@@ -1986,9 +2218,7 @@ function markAsRead() {
 		!stompClient.connected
 	) {
 
-		console.log(
-			"WebSocket not connected while marking read."
-		);
+		
 
 		return;
 
@@ -2011,10 +2241,7 @@ function markAsRead() {
 	);
 
 
-	console.log(
-		"Messages marked READ:",
-		currentChatUser
-	);
+	
 
 }
 
@@ -2104,10 +2331,7 @@ function deleteMessage(
 		.catch(
 			function(error) {
 
-				console.error(
-					"Delete For Me error:",
-					error
-				);
+				
 
 			}
 		);
@@ -2131,9 +2355,7 @@ function deleteForEveryone(
 		!stompClient.connected
 	) {
 
-		console.error(
-			"WebSocket not connected."
-		);
+		
 
 		return;
 
@@ -2148,10 +2370,7 @@ function deleteForEveryone(
 
 	if (!message) {
 
-		console.error(
-			"Message not found:",
-			messageId
-		);
+		
 
 		return;
 
@@ -2167,9 +2386,7 @@ function deleteForEveryone(
 		loggedInUser
 	) {
 
-		console.error(
-			"Only sender can delete for everyone."
-		);
+		
 
 		return;
 
@@ -2210,10 +2427,7 @@ function editMessage(
 
 	if (!message) {
 
-		console.error(
-			"Message not found for edit:",
-			messageId
-		);
+		
 
 		return;
 
@@ -2229,9 +2443,7 @@ function editMessage(
 		loggedInUser
 	) {
 
-		console.error(
-			"Only sender can edit."
-		);
+		
 
 		return;
 
@@ -2247,9 +2459,7 @@ function editMessage(
 		"DELETED"
 	) {
 
-		console.error(
-			"Deleted message cannot be edited."
-		);
+		
 
 		return;
 
@@ -2278,9 +2488,7 @@ function editMessage(
 		editingMessageId =
 			null;
 
-		console.error(
-			"Message input not found."
-		);
+		
 
 		return;
 
@@ -2318,10 +2526,7 @@ function editMessage(
 	);
 
 
-	console.log(
-		"EDIT MODE:",
-		messageId
-	);
+	
 
 }
 
@@ -2342,9 +2547,7 @@ function setEditMode(
 
 	if (!sendButton) {
 
-		console.error(
-			".send-button not found."
-		);
+		
 
 		return;
 
@@ -2503,9 +2706,7 @@ function saveEditedMessage() {
 		null
 	) {
 
-		console.error(
-			"No message is being edited."
-		);
+		
 
 		return;
 
@@ -2568,10 +2769,7 @@ function saveEditedMessage() {
 
 	if (!message) {
 
-		console.error(
-			"Message not found:",
-			messageId
-		);
+		
 
 		return;
 
@@ -2583,9 +2781,7 @@ function saveEditedMessage() {
 		loggedInUser
 	) {
 
-		console.error(
-			"Only sender can edit."
-		);
+		
 
 		return;
 
@@ -2650,10 +2846,7 @@ function saveEditedMessage() {
 	input.focus();
 
 
-	console.log(
-		"Edit request sent:",
-		messageId
-	);
+	
 
 }
 
@@ -2706,10 +2899,7 @@ function updateEditedMessage(
 	event
 ) {
 
-	console.log(
-		"EDIT UPDATE RECEIVED:",
-		event
-	);
+	
 
 
 	if (
@@ -2720,10 +2910,7 @@ function updateEditedMessage(
 		null
 	) {
 
-		console.error(
-			"Invalid edit event:",
-			event
-		);
+		
 
 		return;
 
@@ -2783,9 +2970,7 @@ function updateEditedMessage(
 
 	if (!messageDiv) {
 
-		console.log(
-			"Edited message is not currently visible."
-		);
+		
 
 		return;
 
@@ -2857,10 +3042,7 @@ function updateEditedMessage(
 	}
 
 
-	console.log(
-		"EDIT APPLIED:",
-		messageId
-	);
+	
 
 }
 
@@ -2875,10 +3057,7 @@ function updateDeletedMessage(
 	messageId
 ) {
 
-	console.log(
-		"DELETE FOR EVERYONE EVENT:",
-		messageId
-	);
+	
 
 
 	const messageDiv =
@@ -3220,9 +3399,7 @@ function openMessageSearch() {
 
 	if (!searchBar || !input) {
 
-		console.error(
-			"Message search elements not found."
-		);
+		
 
 		return;
 
@@ -3370,28 +3547,15 @@ function searchMessages(
 	);
 
 
-	console.log(
-		"================================="
-	);
+	
 
-	console.log(
-		"SEARCH:",
-		search
-	);
+	
 
-	console.log(
-		"MATCHES:",
-		messageSearchMatches
-	);
+	
 
-	console.log(
-		"MATCH COUNT:",
-		messageSearchMatches.length
-	);
+	
 
-	console.log(
-		"================================="
-	);
+	
 
 
 	/*
@@ -3550,10 +3714,7 @@ function scrollToSearchResult() {
 
 	if (!messageElement) {
 
-		console.error(
-			"Message element not found:",
-			messageId
-		);
+		
 
 		return;
 
@@ -3827,7 +3988,7 @@ function uploadImage() {
 		document.getElementById("imageInput");
 
 	if (!input) {
-		console.error("imageInput not found");
+		
 		return;
 	}
 
@@ -3878,10 +4039,7 @@ function uploadImage() {
 
 	selectedImageFile = file;
 
-	console.log(
-		"Image selected:",
-		file.name
-	);
+	
 
 	/*
 	 * Optional small indication
@@ -3958,10 +4116,7 @@ function sendSelectedImage() {
         file
     );
 
-    console.log(
-        "Uploading selected image:",
-        file.name
-    );
+    
 
     fetch(
         "/files/upload-image",
@@ -4011,10 +4166,7 @@ function sendSelectedImage() {
     .then(
         data => {
 
-            console.log(
-                "Image uploaded:",
-                data
-            );
+            
 
             if (!data.fileUrl) {
 
@@ -4075,10 +4227,7 @@ function sendSelectedImage() {
     .catch(
         error => {
 
-            console.error(
-                "Image upload error:",
-                error
-            );
+            
 
             alert(
                 "Image upload failed: " +
@@ -4151,10 +4300,7 @@ function sendImageMessage(
 	};
 
 
-	console.log(
-		"Sending image message:",
-		imageMessage
-	);
+	
 
 
 	/*
@@ -4190,6 +4336,90 @@ function sendImageMessage(
 		cancelReply();
 
 	}
+
+}
+
+/* =====================================================
+   GENERAL FILE SELECTION
+===================================================== */
+
+function uploadGeneralFile(sourceInputId) {
+
+    const input =
+        document.getElementById(sourceInputId || "fileInput");
+
+    if (!input) {
+
+        
+
+        return;
+    }
+
+    const file =
+        input.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (!currentChatUser) {
+
+        alert(
+            "Please select a user first."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /* =================================================
+       MAXIMUM FILE SIZE = 10 MB
+    ================================================= */
+
+    if (
+        file.size >
+        10 * 1024 * 1024
+    ) {
+
+        alert(
+            "File must be less than 10 MB."
+        );
+
+        input.value = "";
+
+        return;
+    }
+
+
+    /* =================================================
+       STORE SELECTED FILE
+    ================================================= */
+
+    selectedGeneralFile =
+        file;
+
+    
+
+
+    /* =================================================
+       SHOW FILE NAME
+    ================================================= */
+
+    const messageInput =
+        document.getElementById(
+            "message"
+        );
+
+    if (messageInput) {
+
+        messageInput.placeholder =
+            "Press Enter to send file";
+
+        messageInput.focus();
+
+    }
 
 }
 
@@ -4305,17 +4535,154 @@ document.addEventListener(
 
 /* =====================================================
    VOICE MESSAGE
-   -----------------------------------------------------
-   UI placeholder for now.
-   Actual recording will be added later.
 ===================================================== */
 
 function startVoiceRecording() {
 
-	alert(
-		"Voice recording will be added next."
-	);
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        return;
+    }
 
+    if (!currentChatUser) {
+        alert("Please select a user first.");
+        return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Voice recording is not supported by this browser.");
+        return;
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+
+            const options =
+                window.MediaRecorder &&
+                MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                    ? { mimeType: "audio/webm;codecs=opus" }
+                    : undefined;
+
+            mediaRecorder = new MediaRecorder(stream, options);
+            recordedAudioChunks = [];
+
+            mediaRecorder.ondataavailable = function(event) {
+                if (event.data && event.data.size > 0) {
+                    recordedAudioChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = function() {
+                stream.getTracks().forEach(function(track) {
+                    track.stop();
+                });
+
+                resetVoiceButton();
+
+                const audioBlob = new Blob(
+                    recordedAudioChunks,
+                    { type: mediaRecorder.mimeType || "audio/webm" }
+                );
+
+                if (audioBlob.size > 0) {
+                    uploadVoiceRecording(audioBlob);
+                }
+            };
+
+            mediaRecorder.start();
+            setVoiceButtonRecordingState();
+        })
+        .catch(function() {
+            alert("Microphone permission is required to record a voice message.");
+        });
+}
+
+function setVoiceButtonRecordingState() {
+
+    const button = document.getElementById("micButton");
+
+    if (button) {
+        button.textContent = "■";
+        button.title = "Stop recording";
+        button.style.color = "#f44336";
+    }
+}
+
+function resetVoiceButton() {
+
+    const button = document.getElementById("micButton");
+
+    if (button) {
+        button.textContent = "🎤";
+        button.title = "Voice message";
+        button.style.color = "#555";
+    }
+}
+
+function uploadVoiceRecording(audioBlob) {
+
+    const token = localStorage.getItem("token");
+
+    if (!token || !currentChatUser || !stompClient || !stompClient.connected) {
+        alert("Unable to send the voice message. Please try again.");
+        return;
+    }
+
+    const audioFile = new File(
+        [audioBlob],
+        "voice-message-" + Date.now() + ".webm",
+        { type: audioBlob.type || "audio/webm" }
+    );
+
+    const formData = new FormData();
+    formData.append("file", audioFile);
+
+    fetch("/files/upload-file", {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token },
+        body: formData
+    })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error("Voice upload failed");
+            }
+
+            return response.json();
+        })
+        .then(function(data) {
+            if (!data.fileUrl) {
+                throw new Error("Voice URL not received");
+            }
+
+            sendVoiceMessage(data.fileUrl, audioFile.name);
+        })
+        .catch(function(error) {
+            alert("Voice message failed: " + error.message);
+        });
+}
+
+function sendVoiceMessage(fileUrl, fileName) {
+
+    stompClient.send(
+        "/app/send",
+        {},
+        JSON.stringify({
+            receiver: currentChatUser,
+            content: fileUrl,
+            messageType: "AUDIO",
+            fileName: fileName,
+            replyToMessageId: replyingToMessage
+                ? replyingToMessage.messageId
+                : null,
+            replyToContent: replyingToMessage
+                ? replyingToMessage.content
+                : null
+        })
+    );
+
+    if (typeof cancelReply === "function") {
+        cancelReply();
+    }
 }
 
 /* =====================================================
@@ -4421,4 +4788,273 @@ function renderMessageContent(message) {
 
 
 	return text;
+}
+
+/* =====================================================
+   SEND GENERAL FILE MESSAGE
+===================================================== */
+
+function sendGeneralFileMessage(
+    fileUrl,fileName
+) {
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        alert(
+            "WebSocket is not connected."
+        );
+
+        return;
+    }
+
+
+    if (!currentChatUser) {
+
+        alert(
+            "Please select a user."
+        );
+
+        return;
+    }
+
+
+    const fileMessage = {
+
+		
+    
+        receiver:
+            currentChatUser,
+
+        content:
+            fileUrl,
+
+        messageType:
+            "FILE",
+         fileName:
+    fileName,
+
+        replyToMessageId:
+            replyingToMessage
+                ? replyingToMessage.messageId
+                : null,
+
+        replyToContent:
+            replyingToMessage
+                ? replyingToMessage.content
+                : null
+
+    };
+
+
+    
+
+
+    stompClient.send(
+
+        "/app/send",
+
+        {},
+
+        JSON.stringify(
+            fileMessage
+        )
+
+    );
+
+
+    /* =================================================
+       CLEAR REPLY
+    ================================================= */
+
+    if (
+        typeof cancelReply ===
+        "function"
+    ) {
+
+        cancelReply();
+
+    }
+
+}
+
+/* =====================================================
+   SEND SELECTED GENERAL FILE
+===================================================== */
+
+function sendSelectedGeneralFile() {
+
+    if (!selectedGeneralFile) {
+        return;
+    }
+
+ 
+    const token =
+        localStorage.getItem("token");
+
+    if (!token) {
+
+        alert(
+            "Session expired. Please login again."
+        );
+
+        return;
+    }
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        alert(
+            "WebSocket is not connected."
+        );
+
+        return;
+    }
+
+    if (!currentChatUser) {
+
+        alert(
+            "Please select a user."
+        );
+
+        return;
+    }
+
+    const file =
+        selectedGeneralFile;
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    
+
+    fetch(
+        "/files/upload-file",
+        {
+            method: "POST",
+
+            headers: {
+                "Authorization":
+                    "Bearer " + token
+            },
+
+            body: formData
+        }
+    )
+    .then(
+        async response => {
+
+            const text =
+                await response.text();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    text ||
+                    "File upload failed"
+                );
+
+            }
+
+            try {
+
+                return JSON.parse(
+                    text
+                );
+
+            }
+            catch (error) {
+
+                throw new Error(
+                    "Invalid server response"
+                );
+
+            }
+
+        }
+    )
+    .then(
+        data => {
+
+            
+
+            if (!data.fileUrl) {
+
+                throw new Error(
+                    "File URL not received"
+                );
+
+            }
+
+           sendGeneralFileMessage(
+    data.fileUrl,
+    file.name
+);
+            /* =========================================
+               CLEAR SELECTED FILE
+            ========================================= */
+
+            selectedGeneralFile =
+                null;
+
+            ["fileInput", "documentInput"].forEach(
+                function(inputId) {
+
+                    const input =
+                        document.getElementById(
+                            inputId
+                        );
+
+                    if (input) {
+                        input.value = "";
+                    }
+
+                }
+            );
+
+            /* =========================================
+               RESTORE NORMAL INPUT
+            ========================================= */
+
+            const messageInput =
+                document.getElementById(
+                    "message"
+                );
+
+            if (messageInput) {
+
+                messageInput.placeholder =
+                    "Type a message...";
+
+                messageInput.value =
+                    "";
+
+                messageInput.focus();
+
+            }
+
+        }
+    )
+    .catch(
+        error => {
+
+            
+
+            alert(
+                "File upload failed: " +
+                error.message
+            );
+
+        }
+    );
+
 }

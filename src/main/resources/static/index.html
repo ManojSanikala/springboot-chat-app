@@ -12,7 +12,6 @@
 
     <title>Chat Application</title>
 
-
     <!-- ================= FONT AWESOME ================= -->
 
     <link
@@ -20,20 +19,17 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
-
     <!-- ================= SOCKJS ================= -->
 
     <script
         src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
     </script>
 
-
     <!-- ================= STOMP ================= -->
 
     <script
         src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js">
     </script>
-
 
     <style>
 
@@ -44,7 +40,6 @@
         * {
             box-sizing: border-box;
         }
-
 
         html,
         body {
@@ -65,7 +60,6 @@
             overflow: hidden;
         }
 
-
         /* =====================================================
            APPLICATION
         ===================================================== */
@@ -79,7 +73,6 @@
 
             background: white;
         }
-
 
         /* =====================================================
            USERS PANEL
@@ -100,7 +93,6 @@
 
             flex-direction: column;
         }
-
 
         /* =====================================================
            USERS HEADER
@@ -125,7 +117,6 @@
             flex-shrink: 0;
         }
 
-
         .users-title {
 
             margin: 0;
@@ -136,7 +127,6 @@
 
             color: #222;
         }
-
 
         /* =====================================================
            LOGOUT
@@ -165,12 +155,10 @@
             gap: 5px;
         }
 
-
         .logout-button:hover {
 
             background: #d32f2f;
         }
-
 
         /* =====================================================
            USERS LIST
@@ -184,7 +172,6 @@
 
             overflow-x: hidden;
         }
-
 
         /* =====================================================
            CHAT PANEL
@@ -204,7 +191,6 @@
 
             background: #f5f7fb;
         }
-
 
         /* =====================================================
            CHAT HEADER
@@ -226,7 +212,6 @@
 
             flex-shrink: 0;
         }
-
 
         .chat-header-icon {
 
@@ -250,14 +235,12 @@
             margin-right: 12px;
         }
 
-
         .chat-header-info {
 
             min-width: 0;
 
             flex: 1;
         }
-
 
         #chatWith {
 
@@ -274,7 +257,6 @@
             text-overflow: ellipsis;
         }
 
-
         #typing {
 
             height: 18px;
@@ -287,7 +269,6 @@
 
             overflow: hidden;
         }
-
 
         /* =====================================================
            CHAT AREA
@@ -310,7 +291,6 @@
             scroll-behavior: smooth;
         }
 
-
         /* =====================================================
            EMPTY CHAT
         ===================================================== */
@@ -330,7 +310,6 @@
             text-align: center;
         }
 
-
         .empty-chat i {
 
             font-size: 45px;
@@ -340,12 +319,10 @@
             color: #bbb;
         }
 
-
         .empty-chat div {
 
             font-size: 14px;
         }
-
 
         /* =====================================================
            REPLY PREVIEW
@@ -374,7 +351,6 @@
             overflow: hidden;
         }
 
-
         #replyPreviewContent {
 
             font-size: 13px;
@@ -387,7 +363,6 @@
 
             text-overflow: ellipsis;
         }
-
 
         .cancel-reply {
 
@@ -414,12 +389,10 @@
             cursor: pointer;
         }
 
-
         .cancel-reply:hover {
 
             background: #eee;
         }
-
 
         /* =====================================================
            MESSAGE INPUT
@@ -444,7 +417,6 @@
             flex-shrink: 0;
         }
 
-
         #message {
 
             flex: 1;
@@ -466,7 +438,6 @@
             background: #f8f9fa;
         }
 
-
         #message:focus {
 
             border-color: #2196f3;
@@ -477,7 +448,6 @@
                 0 0 0 2px
                 rgba(33, 150, 243, .08);
         }
-
 
         /* =====================================================
            SEND BUTTON
@@ -514,7 +484,6 @@
                 transform .15s ease;
         }
 
-
         .send-button:hover {
 
             background: #1976d2;
@@ -522,12 +491,10 @@
             transform: scale(1.03);
         }
 
-
         .send-button:active {
 
             transform: scale(.96);
         }
-
 
         /* =====================================================
            SCROLLBAR
@@ -539,7 +506,6 @@
             width: 6px;
         }
 
-
         #chat::-webkit-scrollbar-thumb,
         #users::-webkit-scrollbar-thumb {
 
@@ -547,7 +513,6 @@
 
             border-radius: 10px;
         }
-
 
         /* =====================================================
            MOBILE
@@ -562,30 +527,25 @@
                 min-width: 120px;
             }
 
-
             .chat-panel {
 
                 width: 65%;
             }
-
 
             .users-title {
 
                 font-size: 15px;
             }
 
-
             .logout-button span {
 
                 display: none;
             }
 
-
             .chat-header {
 
                 padding: 0 10px;
             }
-
 
             .chat-header-icon {
 
@@ -598,24 +558,20 @@
                 margin-right: 7px;
             }
 
-
             #chatWith {
 
                 font-size: 14px;
             }
-
 
             #chat {
 
                 padding: 10px;
             }
 
-
             .message-input-area {
 
                 padding: 8px;
             }
-
 
             #message {
 
@@ -628,9 +584,140 @@
 
 </head>
 
-
 <body>
 
+<!-- =====================================================
+     NEW MESSAGE NOTIFICATION
+===================================================== -->
+
+<div
+    id="messageNotification"
+    style="
+        display:none;
+
+        position:fixed;
+
+        top:20px;
+        right:20px;
+
+        width:320px;
+        max-width:calc(100vw - 30px);
+
+        background:#ffffff;
+
+        border:1px solid #ddd;
+
+        border-radius:12px;
+
+        box-shadow:
+            0 6px 25px
+            rgba(0,0,0,.20);
+
+        padding:14px;
+
+        z-index:999999;
+
+        cursor:pointer;
+    "
+>
+
+    <div
+        style="
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+        "
+    >
+
+        <!-- ICON -->
+
+        <div
+            style="
+                width:40px;
+                height:40px;
+                min-width:40px;
+
+                border-radius:50%;
+
+                background:#2196F3;
+
+                color:white;
+
+                display:flex;
+                align-items:center;
+                justify-content:center;
+
+                font-size:18px;
+            "
+        >
+
+            <i class="fa-solid fa-message"></i>
+
+        </div>
+
+        <!-- CONTENT -->
+
+        <div
+            style="
+                flex:1;
+                min-width:0;
+            "
+        >
+
+            <div
+                id="messageNotificationSender"
+                style="
+                    font-size:14px;
+                    font-weight:600;
+                    color:#222;
+
+                    margin-bottom:4px;
+                "
+            >
+                New message
+            </div>
+
+            <div
+                id="messageNotificationContent"
+                style="
+                    font-size:13px;
+                    color:#666;
+
+                    white-space:nowrap;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                "
+            >
+                You received a new message.
+            </div>
+
+        </div>
+
+        <!-- CLOSE -->
+
+        <button
+            type="button"
+            onclick="event.stopPropagation(); hideMessageNotification();"
+            style="
+                border:none;
+                background:transparent;
+
+                color:#888;
+
+                cursor:pointer;
+
+                font-size:18px;
+
+                padding:0;
+            "
+            title="Close"
+        >
+            ×
+        </button>
+
+    </div>
+
+</div>
 
 <!-- =====================================================
      APPLICATION
@@ -638,13 +725,11 @@
 
 <div class="app-container">
 
-
     <!-- =================================================
          USERS PANEL
     ================================================== -->
 
     <div class="users-panel">
-
 
         <!-- USERS HEADER -->
 
@@ -657,7 +742,6 @@
                 Chat
 
             </h2>
-
 
             <button
                 type="button"
@@ -677,7 +761,6 @@
             </button>
 
         </div>
-
 
         <!-- USERS -->
 
@@ -699,13 +782,11 @@
 
     </div>
 
-
     <!-- =================================================
          CHAT PANEL
     ================================================== -->
 
     <div class="chat-panel">
-
 
         <!-- =================================================
              CHAT HEADER
@@ -719,15 +800,13 @@
 
             </div>
 
-
             <div class="chat-header-info">
 
                 <h3 id="chatWith">
                     Select User
                 </h3>
 
-			
-				<!-- ================= MESSAGE SEARCH ================= -->
+&#x9;			<!-- ================= MESSAGE SEARCH ================= -->
 
 <div
     id="messageSearchBar"
@@ -811,7 +890,6 @@
 
         </div>
 
-
         <!-- =================================================
              CHAT MESSAGES
 
@@ -839,7 +917,6 @@
 
         </div>
 
-
         <!-- =================================================
              REPLY PREVIEW
         ================================================== -->
@@ -859,10 +936,8 @@
 
             </div>
 
-
             <div id="replyPreviewContent">
             </div>
-
 
             <button
                 type="button"
@@ -877,7 +952,7 @@
 
         </div>
 
-		<!-- =====================================================
+&#x9;	<!-- =====================================================
      CHAT INPUT PANEL
 ===================================================== -->
 
@@ -971,7 +1046,6 @@
 
         </button>
 
-
         <!-- DOCUMENT -->
 
         <button
@@ -1022,7 +1096,6 @@
             </span>
 
         </button>
-
 
         <!-- FILE -->
 
@@ -1077,7 +1150,6 @@
 
     </div>
 
-
     <!-- =================================================
          HIDDEN FILE INPUTS
     ================================================= -->
@@ -1090,7 +1162,6 @@
     onchange="uploadImage()"
 >
 
-
     <input
         type="file"
 
@@ -1098,22 +1169,16 @@
 
         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx"
 
-        style="
-            display:none;
-        "
+        style="display:none;"
+onchange="uploadGeneralFile('documentInput')"
     >
-
 
     <input
-        type="file"
-
-        id="fileInput"
-
-        style="
-            display:none;
-        "
-    >
-
+    type="file"
+    id="fileInput"
+    style="display:none;"
+    onchange="uploadGeneralFile('fileInput')"
+>
 
     <!-- =================================================
          MESSAGE INPUT ROW
@@ -1142,7 +1207,6 @@
             box-sizing:border-box;
         "
     >
-
 
         <!-- ================= PLUS BUTTON ================= -->
 
@@ -1188,7 +1252,6 @@
 
         </button>
 
-
         <!-- ================= MESSAGE INPUT ================= -->
 
         <input
@@ -1216,7 +1279,6 @@
                 font-size:14px;
             "
         >
-
 
         <!-- ================= MICROPHONE ================= -->
 
@@ -1259,7 +1321,6 @@
             🎤
 
         </button>
-
 
         <!-- ================= SEND ================= -->
 
@@ -1321,7 +1382,6 @@
 
 <script src="/js/messages.js"></script>
 
-
 <!-- =====================================================
      LOGOUT + LOGIN CHECK
 ===================================================== -->
@@ -1334,12 +1394,7 @@
 
     function logout() {
 
-        console.log(
-            "Logging out..."
-        );
-
-
-        /*
+/*
          * Stop WebSocket
          */
 
@@ -1354,25 +1409,15 @@
                 stompClient.disconnect(
                     function () {
 
-                        console.log(
-                            "WebSocket disconnected"
-                        );
-
-                    }
+}
                 );
 
             }
             catch (error) {
 
-                console.error(
-                    "WebSocket disconnect error:",
-                    error
-                );
-
-            }
+}
 
         }
-
 
         /*
          * Remove JWT
@@ -1382,13 +1427,11 @@
             "token"
         );
 
-
         /*
          * Clear session
          */
 
         sessionStorage.clear();
-
 
         /*
          * Go to login
@@ -1399,7 +1442,6 @@
         );
 
     }
-
 
     /* =====================================================
        CHECK LOGIN
@@ -1414,7 +1456,6 @@
                     "token"
                 );
 
-
             if (!token) {
 
                 window.location.replace(
@@ -1425,16 +1466,10 @@
 
             }
 
-
-            console.log(
-                "Chat application started"
-            );
-
-        }
+}
     );
 
 </script>
-
 
 </body>
 
