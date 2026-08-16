@@ -12,6 +12,7 @@ public class ChatMessage {
 
     private String replyToContent;
     private String fileName;
+    private boolean forwarded;
 
     /*
      * =====================================================
@@ -166,4 +167,13 @@ public class ChatMessage {
         this.fileName = fileName;
 
 }
+    
+    
+    public boolean isForwarded() {
+        return forwarded;
+    }
+
+    public void setForwarded(boolean forwarded) {
+        this.forwarded = forwarded;
+    }
 }

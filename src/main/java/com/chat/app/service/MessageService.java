@@ -135,13 +135,14 @@ public class MessageService {
     // =====================================================
 
     public Message savePrivateMessage(
-    		String senderUsername,
+            String senderUsername,
             String receiverUsername,
             String content,
             Long replyToMessageId,
             String replyToContent,
             String messageType,
-            String fileName) {
+            String fileName,
+            boolean forwarded) {
 
 
         User sender =
@@ -207,6 +208,7 @@ public class MessageService {
          * If frontend does not send a type,
          * keep it as TEXT.
          */
+      
 
         if (
             messageType == null ||
@@ -223,10 +225,10 @@ public class MessageService {
             message.setMessageType(
                 messageType.toUpperCase()
             );
-            message.setFileName(
-            	    fileName
-            	);
 
+            message.setFileName(
+                fileName
+            );
         }
 
 
@@ -240,9 +242,19 @@ public class MessageService {
             replyToMessageId
         );
 
-
         message.setReplyToContent(
             replyToContent
+        );
+
+
+        /*
+         * =================================================
+         * FORWARDED MESSAGE
+         * =================================================
+         */
+
+        message.setForwarded(
+            forwarded
         );
 
 
@@ -250,8 +262,6 @@ public class MessageService {
             message
         );
     }
-
-
     // =====================================================
     // GET CONVERSATION HISTORY
     // =====================================================
@@ -372,10 +382,14 @@ public class MessageService {
                         );
 
                 response.setFileName(
-                    message.getFileName()
-                );
+                	    message.getFileName()
+                	);
 
-                return response;
+                	response.setForwarded(
+                	    message.isForwarded()
+                	);
+
+                	return response;
 
             })
 
@@ -505,10 +519,14 @@ public class MessageService {
                         );
 
                 response.setFileName(
-                    message.getFileName()
-                );
+                	    message.getFileName()
+                	);
 
-                return response;
+                	response.setForwarded(
+                	    message.isForwarded()
+                	);
+
+                	return response;
 
             })
 

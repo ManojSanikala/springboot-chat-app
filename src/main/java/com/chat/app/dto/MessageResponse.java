@@ -35,6 +35,8 @@ public class MessageResponse {
     private String messageType = "TEXT";
 
     private String fileName;
+    
+    private boolean forwarded;
 
     /*
      * =====================================================
@@ -248,5 +250,12 @@ public class MessageResponse {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
+    
+    public boolean isForwarded() {
+        return forwarded;
+    }
 
+    public void setForwarded(boolean forwarded) {
+        this.forwarded = forwarded;
+    }
 }

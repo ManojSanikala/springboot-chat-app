@@ -19,6 +19,8 @@ public class ChatHistoryResponse {
     private Long replyToMessageId;
 
     private String replyToContent;
+    
+    private boolean forwarded;
 
     /*
      * =====================================================
@@ -169,6 +171,13 @@ public class ChatHistoryResponse {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+    public boolean isForwarded() {
+        return forwarded;
+    }
+
+    public void setForwarded(boolean forwarded) {
+        this.forwarded = forwarded;
     }
 
 }

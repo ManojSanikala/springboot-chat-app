@@ -37,6 +37,7 @@ let selectedGeneralFile = null;
 
 let mediaRecorder = null;
 let recordedAudioChunks = [];
+let forwardingMessage = null;
 
 /* =====================================================
    JWT SESSION VALIDATION
@@ -1279,7 +1280,32 @@ function appendMessage(
     😊 React
 </button>
 
+<!-- FORWARD: BOTH SENDER + RECEIVER -->
 
+<button
+    type="button"
+    onclick="
+        event.stopPropagation();
+
+        openForwardDialog(
+            ${message.id}
+        );
+
+        closeAllMessageMenus();
+    "
+    style="
+        display:block;
+        width:100%;
+        padding:11px 12px;
+        border:none;
+        background:white;
+        text-align:left;
+        cursor:pointer;
+        font-size:14px;
+    "
+>
+    ↗ Forward
+</button>
 ${isMyMessage
     ?
     `
@@ -1456,10 +1482,27 @@ ${isMyMessage
 
                 ${replyHTML}
 
+${message.forwarded
+    ?
+    `
+        <div
+            style="
+                font-size:11px;
+                color:#777;
+                font-style:italic;
+                margin-bottom:5px;
+            "
+        >
+            Forwarded
+        </div>
+    `
+    :
+    ""
+}
 
-                <!-- MESSAGE CONTENT -->
 
-             <div
+
+<div
     class="message-content"
     style="
         line-height:1.4;
@@ -1715,6 +1758,188 @@ function closeAllMessageMenus() {
 
 }
 
+/* =====================================================
+   FORWARD MESSAGE
+===================================================== */
+
+function openForwardDialog(messageId) {
+
+    const message =
+        messageStore[messageId];
+
+    if (!message) {
+        alert("Message not found.");
+        return;
+    }
+
+    forwardingMessage = message;
+
+    const existing =
+        document.getElementById(
+            "forwardDialog"
+        );
+
+    if (existing) {
+        existing.remove();
+    }
+
+    const dialog =
+        document.createElement("div");
+
+    dialog.id =
+        "forwardDialog";
+
+    dialog.style.position =
+        "fixed";
+
+    dialog.style.left =
+        "0";
+
+    dialog.style.top =
+        "0";
+
+    dialog.style.width =
+        "100%";
+
+    dialog.style.height =
+        "100%";
+
+    dialog.style.background =
+        "rgba(0,0,0,.45)";
+
+    dialog.style.display =
+        "flex";
+
+    dialog.style.alignItems =
+        "center";
+
+    dialog.style.justifyContent =
+        "center";
+
+    dialog.style.zIndex =
+        "999999";
+
+    dialog.innerHTML = `
+
+        <div
+            style="
+                width:360px;
+                max-width:90%;
+                max-height:80vh;
+                background:white;
+                border-radius:12px;
+                box-shadow:0 8px 30px rgba(0,0,0,.25);
+                overflow:hidden;
+                display:flex;
+                flex-direction:column;
+            "
+        >
+
+            <div
+                style="
+                    padding:15px;
+                    border-bottom:1px solid #ddd;
+                    font-size:17px;
+                    font-weight:600;
+                "
+            >
+                ↗ Forward Message
+            </div>
+
+
+            <div
+                style="
+                    padding:12px;
+                    background:#f5f7fb;
+                    border-bottom:1px solid #ddd;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:12px;
+                        color:#777;
+                        margin-bottom:5px;
+                    "
+                >
+                    Message
+                </div>
+
+                <div
+                    style="
+                        background:white;
+                        padding:10px;
+                        border-radius:8px;
+                        font-size:13px;
+                        word-break:break-word;
+                    "
+                >
+                    ${getForwardPreview(message)}
+                </div>
+
+            </div>
+
+
+            <div
+                id="forwardUsers"
+                style="
+                    flex:1;
+                    overflow-y:auto;
+                    padding:8px;
+                "
+            >
+                Loading users...
+            </div>
+
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:flex-end;
+                    gap:8px;
+                    padding:12px;
+                    border-top:1px solid #ddd;
+                "
+            >
+
+                <button
+                    type="button"
+                    onclick="closeForwardDialog()"
+                    style="
+                        border:none;
+                        background:#eee;
+                        padding:9px 15px;
+                        border-radius:7px;
+                        cursor:pointer;
+                    "
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    onclick="forwardSelectedMessage()"
+                    style="
+                        border:none;
+                        background:#2196f3;
+                        color:white;
+                        padding:9px 15px;
+                        border-radius:7px;
+                        cursor:pointer;
+                    "
+                >
+                    Forward
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(dialog);
+
+    loadForwardUsers();
+}
 
 /* =====================================================
    TOGGLE MESSAGE MENU
@@ -5605,4 +5830,300 @@ reactionDisplay.style.borderRadius =
      */
     reactionDisplay.textContent =
         reactionEvent.reaction;
+}
+
+function getForwardPreview(message) {
+
+    if (!message) {
+        return "";
+    }
+
+    if (
+        message.messageType ===
+        "IMAGE"
+    ) {
+
+        return "🖼️ Image";
+
+    }
+
+    if (
+        message.messageType ===
+        "DOCUMENT"
+    ) {
+
+        return "📄 " +
+            (
+                message.fileName ||
+                "Document"
+            );
+
+    }
+
+    if (
+        message.messageType ===
+        "FILE"
+    ) {
+
+        return "📎 " +
+            (
+                message.fileName ||
+                "File"
+            );
+
+    }
+
+    if (
+        message.messageType ===
+        "VOICE"
+    ) {
+
+        return "🎤 Voice message";
+
+    }
+
+    return escapeHtmlSafe(
+        message.content ||
+        ""
+    );
+}
+
+function loadForwardUsers() {
+
+    const token =
+        localStorage.getItem(
+            "token"
+        );
+
+    const container =
+        document.getElementById(
+            "forwardUsers"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    fetch(
+        "/user/all",
+        {
+            method: "GET",
+
+            headers: {
+                "Authorization":
+                    "Bearer " + token
+            }
+        }
+    )
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error(
+                "Unable to load users"
+            );
+        }
+
+        return response.json();
+
+    })
+
+    .then(users => {
+
+        container.innerHTML = "";
+
+        users.forEach(
+            user => {
+
+                /*
+                 * Don't show logged-in user
+                 * as forwarding target.
+                 */
+
+                if (
+                    user.username ===
+                    loggedInUser
+                ) {
+                    return;
+                }
+
+                const row =
+                    document.createElement(
+                        "label"
+                    );
+
+                row.style.display =
+                    "flex";
+
+                row.style.alignItems =
+                    "center";
+
+                row.style.gap =
+                    "10px";
+
+                row.style.padding =
+                    "10px";
+
+                row.style.cursor =
+                    "pointer";
+
+                row.style.borderBottom =
+                    "1px solid #eee";
+
+                row.innerHTML = `
+
+                    <input
+                        type="checkbox"
+                        class="forward-user"
+                        value="${escapeHtmlSafe(
+                            user.username
+                        )}"
+                    >
+
+                    <span>
+                        👤
+                        ${escapeHtmlSafe(
+                            user.username
+                        )}
+                    </span>
+
+                `;
+
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    })
+
+    .catch(error => {
+
+        console.error(
+            "Forward users error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div
+                style="
+                    padding:15px;
+                    color:#d32f2f;
+                    text-align:center;
+                "
+            >
+                Unable to load users.
+            </div>
+        `;
+
+    });
+}
+
+function closeForwardDialog() {
+
+    const dialog =
+        document.getElementById(
+            "forwardDialog"
+        );
+
+    if (dialog) {
+        dialog.remove();
+    }
+
+    forwardingMessage =
+        null;
+}
+
+function forwardSelectedMessage() {
+
+    if (!forwardingMessage) {
+        alert("No message selected.");
+        return;
+    }
+
+    const selectedUsers =
+        Array.from(
+            document.querySelectorAll(
+                ".forward-user:checked"
+            )
+        ).map(
+            checkbox =>
+                checkbox.value
+        );
+
+    if (
+        selectedUsers.length === 0
+    ) {
+
+        alert(
+            "Please select at least one user."
+        );
+
+        return;
+    }
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        alert(
+            "WebSocket is not connected."
+        );
+
+        return;
+    }
+
+
+    selectedUsers.forEach(
+        receiver => {
+
+            const forwardedMessage = {
+
+                receiver:
+                    receiver,
+
+                content:
+                    forwardingMessage.content,
+
+                messageType:
+                    forwardingMessage.messageType ||
+                    "TEXT",
+
+                fileName:
+                    forwardingMessage.fileName ||
+                    null,
+
+                replyToMessageId:
+                    null,
+
+                replyToContent:
+                    null,
+
+                forwarded:
+                    true
+
+            };
+
+
+            stompClient.send(
+
+                "/app/send",
+
+                {},
+
+                JSON.stringify(
+                    forwardedMessage
+                )
+
+            );
+
+        }
+    );
+
+
+    closeForwardDialog();
+
+   
 }

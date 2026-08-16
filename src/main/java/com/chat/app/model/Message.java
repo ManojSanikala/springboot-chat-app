@@ -2,6 +2,7 @@ package com.chat.app.model;
 
 import com.chat.app.enums.MessageStatus;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -45,6 +46,8 @@ public class Message {
 
     private String replyToContent;
     private String fileName;
+    @Column(nullable = false)
+    private boolean forwarded = false;
 
     /*
      * =====================================================
@@ -278,5 +281,13 @@ public class Message {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+    
+    public boolean isForwarded() {
+        return forwarded;
+    }
+
+    public void setForwarded(boolean forwarded) {
+        this.forwarded = forwarded;
     }
 }

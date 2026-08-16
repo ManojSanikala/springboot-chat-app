@@ -75,8 +75,9 @@ public class ChatController {
 
                     message.getMessageType(),
 
-                    message.getFileName()
+                    message.getFileName(),
 
+                    message.isForwarded()
                 );
 
 
@@ -114,8 +115,12 @@ public class ChatController {
 
 
         response.setFileName(
-            savedMessage.getFileName()
-        );
+        	    savedMessage.getFileName()
+        	);
+
+        	response.setForwarded(
+        	    savedMessage.isForwarded()
+        	);
 
         // =================================================
         // Send message to Receiver
