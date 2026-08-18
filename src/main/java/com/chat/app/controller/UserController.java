@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chat.app.dto.UserRequest;
 import com.chat.app.dto.UserResponse;
+import com.chat.app.service.UserBlockService;
 import com.chat.app.service.UserService;
 
 import jakarta.validation.Valid;
@@ -27,6 +28,8 @@ import jakarta.validation.Valid;
 public class UserController {
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private UserBlockService userBlockService;
 	
 	@PostMapping("/join")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -65,5 +68,62 @@ public class UserController {
 		 userService.removeUser(name);
 		
 		return ResponseEntity.ok("User removed successfully");
+	}
+	// =====================================================
+	// BLOCK USER
+	// =====================================================
+
+	@PostMapping("/block/{username}")
+	public ResponseEntity<String> blockUser(
+	        @PathVariable String username,
+	        Principal principal) {
+
+	    userBlockService.blockUser(
+	            principal.getName(),
+	            username
+	    );
+
+	    return ResponseEntity.ok(
+	            "User blocked successfully"
+	    );
+	}
+
+
+	// =====================================================
+	// UNBLOCK USER
+	// =====================================================
+
+	@DeleteMapping("/block/{username}")
+	public ResponseEntity<String> unblockUser(
+	        @PathVariable String username,
+	        Principal principal) {
+
+	    userBlockService.unblockUser(
+	            principal.getName(),
+	            username
+	    );
+
+	    return ResponseEntity.ok(
+	            "User unblocked successfully"
+	    );
+	}
+
+
+	// =====================================================
+	// CHECK BLOCK STATUS
+	// =====================================================
+
+	@GetMapping("/block/{username}")
+	public ResponseEntity<Boolean> checkBlockStatus(
+	        @PathVariable String username,
+	        Principal principal) {
+
+	    boolean blocked =
+	            userBlockService.isBlocked(
+	                    principal.getName(),
+	                    username
+	            );
+
+	    return ResponseEntity.ok(blocked);
 	}
 }

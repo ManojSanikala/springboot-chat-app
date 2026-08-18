@@ -576,7 +576,9 @@ function selectUser(username) {
         username;
 
     setChatControlsEnabled(true);
-
+	if (typeof loadBlockStatus === "function") {
+    loadBlockStatus(username);
+}
 
     const typingIndicator =
         document.getElementById(
@@ -601,7 +603,7 @@ function selectUser(username) {
     if (chatWith) {
 
         chatWith.innerHTML =
-            "Chat with " + username;
+             username;
 
     }
 

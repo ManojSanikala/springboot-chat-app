@@ -271,6 +271,7 @@ function connectWebSocket() {
             subscribeToEdit();
             
             subscribeToReaction();
+            subscribeToBlockStatus();
 
 
             console.log(
@@ -1928,4 +1929,114 @@ function subscribeToReaction() {
 
         }
     );
+}
+/* =====================================================
+   BLOCK STATUS
+   Receives notification when current user is blocked
+===================================================== */
+
+function subscribeToBlockStatus() {
+
+    if (
+        !stompClient ||
+        !stompClient.connected
+    ) {
+
+        return;
+
+    }
+
+
+    console.log(
+        "Subscribing to /user/queue/block-status"
+    );
+
+
+    stompClient.subscribe(
+
+        "/user/queue/block-status",
+
+        function (message) {
+
+            let blockEvent;
+
+
+            try {
+
+                blockEvent =
+                    JSON.parse(
+                        message.body
+                    );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Invalid block status event:",
+                    message.body
+                );
+
+                return;
+
+            }
+
+
+            console.log(
+                "BLOCK STATUS EVENT:",
+                blockEvent
+            );
+
+
+            /*
+             * =================================================
+             * USER IS BLOCKED
+             * =================================================
+             */
+
+            if (
+                blockEvent.blocked === true
+            ) {
+
+                /*
+                 * Show message to logged-in user.
+                 */
+
+                alert(
+                    blockEvent.message ||
+                    "You are blocked by this user."
+                );
+
+
+                /*
+                 * Clear message input if available.
+                 */
+
+                const messageInput =
+                    document.getElementById(
+                        "message"
+                    );
+
+
+                if (messageInput) {
+
+                    messageInput.value =
+                        "";
+
+                }
+
+
+                /*
+                 * Keep current conversation open.
+                 * User can see old messages,
+                 * but cannot send new messages.
+                 */
+
+                return;
+
+            }
+
+        }
+
+    );
+
 }

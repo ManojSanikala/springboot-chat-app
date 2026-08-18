@@ -64,6 +64,7 @@ public class Message {
     private String messageType = "TEXT";
 
 
+    private java.time.LocalDateTime expiresAt;
     /*
      * =====================================================
      * CONSTRUCTORS
@@ -290,4 +291,16 @@ public class Message {
     public void setForwarded(boolean forwarded) {
         this.forwarded = forwarded;
     }
+
+
+	public java.time.LocalDateTime getExpiresAt() {
+		return expiresAt;
+	}
+
+
+	public void setExpiresAt(java.time.LocalDateTime expiresAt) {
+		this.expiresAt = expiresAt;
+	}
+    
+    
 }

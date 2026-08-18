@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import com.chat.app.dto.BlockStatusEvent;
 import com.chat.app.dto.ChatMessage;
 import com.chat.app.dto.DeleteForEveryoneEvent;
 import com.chat.app.dto.DeleteMessageEvent;
@@ -60,26 +61,67 @@ public class ChatController {
         // Save message into database
         // =================================================
 
-        Message savedMessage =
-                messageService.savePrivateMessage(
+        Message savedMessage;
 
-                    sender,
+        try {
 
-                    message.getReceiver(),
+            savedMessage =
+                    messageService.savePrivateMessage(
 
-                    message.getContent(),
+                        sender,
 
-                    message.getReplyToMessageId(),
+                        message.getReceiver(),
 
-                    message.getReplyToContent(),
+                        message.getContent(),
 
-                    message.getMessageType(),
+                        message.getReplyToMessageId(),
 
-                    message.getFileName(),
+                        message.getReplyToContent(),
 
-                    message.isForwarded()
-                );
+                        message.getMessageType(),
 
+                        message.getFileName(),
+
+                        message.isForwarded()
+                    );
+
+        }
+        catch (IllegalStateException exception) {
+
+            /*
+             * =================================================
+             * BLOCKED USER
+             * =================================================
+             */
+
+            BlockStatusEvent blockEvent =
+                    new BlockStatusEvent(
+
+                        message.getReceiver(),
+
+                        true,
+
+                        "You are blocked by this user"
+                    );
+
+
+            /*
+             * Tell sender immediately that
+             * the message was not sent.
+             */
+
+            messagingTemplate.convertAndSendToUser(
+
+                sender,
+
+                "/queue/block-status",
+
+                blockEvent
+            );
+
+
+            return;
+        }
 
         // =================================================
         // Convert Entity -> Response DTO

@@ -1,5 +1,6 @@
 package com.chat.app.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import com.chat.app.exception.UserNotFoundException;
 import com.chat.app.model.Message;
 import com.chat.app.model.User;
 import com.chat.app.repository.MessageRepository;
+import com.chat.app.repository.UserChatSettingRepository;
 import com.chat.app.repository.UserRepository;
 
 @Service
@@ -24,6 +26,12 @@ public class MessageService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private UserBlockService userBlockService;
+    
+    @Autowired
+    private UserChatSettingRepository userChatSettingRepository;
 
 
     // =====================================================
@@ -167,6 +175,19 @@ public class MessageService {
                             "Receiver not found"
                         )
                     );
+     // =====================================================
+     // BLOCK CHECK
+     // Receiver has blocked the sender
+     // =====================================================
+
+     if (userBlockService.isBlocked(
+             receiverUsername,
+             senderUsername)) {
+
+         throw new IllegalStateException(
+             "You are blocked by this user"
+         );
+     }
 
 
         Message message =
@@ -254,13 +275,57 @@ public class MessageService {
          */
 
         message.setForwarded(
-            forwarded
-        );
+        	    forwarded
+        	);
 
 
-        return messageRepository.save(
-            message
-        );
+        	/*
+        	 * =====================================================
+        	 * DISAPPEARING MESSAGE
+        	 * =====================================================
+        	 *
+        	 * Get the disappearing-message setting for
+        	 * this sender -> receiver conversation.
+        	 *
+        	 * 0 or missing = message never expires.
+        	 */
+
+        	Long disappearingMinutes =
+        	        userChatSettingRepository
+        	            .findByUsernameAndChatWith(
+        	                senderUsername,
+        	                receiverUsername
+        	            )
+        	            .map(setting ->
+        	                setting.getDisappearingMinutes()
+        	            )
+        	            .orElse(0L);
+
+
+        	if (
+        	    disappearingMinutes != null &&
+        	    disappearingMinutes > 0
+        	) {
+
+        	    message.setExpiresAt(
+        	        LocalDateTime.now()
+        	            .plusMinutes(
+        	                disappearingMinutes
+        	            )
+        	    );
+
+        	}
+        	else {
+
+        	    message.setExpiresAt(
+        	        null
+        	    );
+        	}
+
+
+        	return messageRepository.save(
+        	    message
+        	);
     }
     // =====================================================
     // GET CONVERSATION HISTORY
@@ -307,9 +372,28 @@ public class MessageService {
 
 
         return messages
-            .stream()
+        	    .stream()
 
-            .filter(message -> {
+        	    /*
+        	     * =====================================================
+        	     * REMOVE EXPIRED DISAPPEARING MESSAGES FROM CHAT
+        	     * =====================================================
+        	     */
+        	    .filter(message -> {
+
+        	        if (
+        	            message.getExpiresAt() != null &&
+        	            message.getExpiresAt()
+        	                   .isBefore(LocalDateTime.now())
+        	        ) {
+
+        	            return false;
+        	        }
+
+        	        return true;
+        	    })
+
+        	    .filter(message -> {
 
                 /*
                  * Sender deleted for himself

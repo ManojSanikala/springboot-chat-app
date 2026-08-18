@@ -1,0 +1,159 @@
+.message-wrapper {
+    width: 100% !important;
+
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    align-items: flex-end !important;
+
+    gap: 6px !important;
+
+    box-sizing: border-box !important;
+
+    margin-bottom: 10px !important;
+
+    padding: 0 5px !important;
+}
+
+
+/* Sender */
+.message-wrapper.sent {
+    justify-content: flex-end !important;
+}
+
+
+/* Receiver */
+.message-wrapper.received {
+    justify-content: flex-start !important;
+}
+
+
+/* Message bubble ALWAYS first */
+.message-wrapper .message-bubble {
+    order: 1 !important;
+
+    position: relative !important;
+
+    width: fit-content !important;
+
+    max-width: 85% !important;
+
+    min-width: 80px !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* Three dots ALWAYS second */
+.message-wrapper .message-actions {
+    order: 2 !important;
+
+    position: relative !important;
+
+    width: 30px !important;
+
+    min-width: 30px !important;
+
+    height: 30px !important;
+
+    flex-shrink: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+}
+
+
+/* Three dots button */
+.message-menu-button {
+
+    width: 30px !important;
+
+    height: 30px !important;
+
+    border: none !important;
+
+    background: transparent !important;
+
+    color: #555 !important;
+
+    cursor: pointer !important;
+
+    font-size: 20px !important;
+
+    line-height: 30px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    border-radius: 50% !important;
+}
+
+.message-menu-button:hover {
+    background: #e9edf2 !important;
+}
+
+
+/* Message menu */
+.message-options-menu {
+
+    position: absolute !important;
+
+    top: 34px !important;
+
+    right: 0 !important;
+
+    left: auto !important;
+
+    width: 190px !important;
+
+    background: #fff !important;
+
+    border: 1px solid #ddd !important;
+
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,.18) !important;
+
+    z-index: 999999 !important;
+
+    overflow: hidden !important;
+}
+
+
+/* Menu buttons */
+.message-option-button {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    padding: 11px 13px !important;
+
+    border: none !important;
+
+    background: #fff !important;
+
+    color: #333 !important;
+
+    text-align: left !important;
+
+    font-size: 13px !important;
+
+    cursor: pointer !important;
+}
+
+.message-option-button:hover {
+    background: #f5f7fb !important;
+}

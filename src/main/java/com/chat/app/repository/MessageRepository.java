@@ -1,5 +1,6 @@
 package com.chat.app.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,4 +70,59 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             String receiver,
             List<MessageStatus> statuses
     );
+    
+    /*
+     * =====================================================
+     * FIND EXPIRED MESSAGES
+     *
+     * Used by the disappearing-message scheduler.
+     * =====================================================
+     */
+    List<Message> findByExpiresAtBefore(
+            LocalDateTime currentTime
+    );
+
+
+    /*
+     * =====================================================
+     * GET PRIVATE CHAT HISTORY
+     * EXCLUDING EXPIRED MESSAGES
+     *
+     * Existing messages with expiresAt = NULL
+     * remain available normally.
+     * =====================================================
+     */
+    @Query("""
+        SELECT m
+        FROM Message m
+        WHERE
+            (
+                (m.sender.username = :user1
+                 AND m.receiver.username = :user2)
+                OR
+                (m.sender.username = :user2
+                 AND m.receiver.username = :user1)
+            )
+            AND
+            (
+                m.expiresAt IS NULL
+                OR m.expiresAt > :currentTime
+            )
+        ORDER BY m.id ASC
+    """)
+    List<Message> findConversationExcludingExpired(
+            @Param("user1") String user1,
+            @Param("user2") String user2,
+            @Param("currentTime") LocalDateTime currentTime
+    );
+    
+    @Query("""
+    	    SELECT m
+    	    FROM Message m
+    	    WHERE m.expiresAt IS NOT NULL
+    	      AND m.expiresAt <= :now
+    	""")
+    	List<Message> findExpiredMessages(
+    	        @Param("now") java.time.LocalDateTime now
+    	);
 }

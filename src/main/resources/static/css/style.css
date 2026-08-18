@@ -1,0 +1,1516 @@
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+}
+
+
+/* =====================================================
+   MAIN APPLICATION LAYOUT
+===================================================== */
+
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+
+/* =====================================================
+   USERS PANEL
+===================================================== */
+
+.users-panel {
+    width: 300px;
+    min-width: 300px;
+    height: 100%;
+    background: #ffffff;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.users-header {
+    height: 65px;
+    min-height: 65px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    background: #ffffff;
+}
+
+.users-title {
+    margin: 0;
+    font-size: 20px;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#users {
+    flex: 1;
+    overflow-y: auto;
+}
+
+
+/* =====================================================
+   CHAT PANEL
+===================================================== */
+
+.chat-panel {
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: #f7f8fa;
+}
+
+
+/* =====================================================
+   CHAT HEADER
+===================================================== */
+
+.chat-header {
+    height: 65px;
+    min-height: 65px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+    position: relative;
+}
+
+.chat-header-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    background: #2196f3;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.chat-header-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-header-info h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #222;
+}
+
+
+/* =====================================================
+   RECEIVER HEADER ACTIONS
+===================================================== */
+
+.receiver-header-actions {
+    position: relative;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.receiver-menu-button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    color: #555;
+}
+
+.receiver-menu-button:hover {
+    background: #eef1f4;
+}
+
+.receiver-options-menu {
+    display: none;
+    position: absolute;
+    top: 44px;
+    right: 0;
+    width: 210px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.receiver-options-menu.show {
+    display: block;
+}
+
+
+/* =====================================================
+   CHAT MESSAGES AREA
+===================================================== */
+
+#chat {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =====================================================
+   EMPTY CHAT
+===================================================== */
+
+.empty-chat {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #888;
+}
+
+.empty-chat i {
+    font-size: 45px;
+    margin-bottom: 12px;
+    color: #bbb;
+}
+
+
+/* =====================================================
+   MESSAGE ROW
+===================================================== */
+
+.message-wrapper {
+    display: flex !important;
+    align-items: flex-end !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+    gap: 4px !important;
+}
+
+
+/*
+   IMPORTANT:
+
+   Both sent and received messages are aligned
+   toward the appropriate side.
+*/
+
+.message-wrapper.sent {
+    justify-content: flex-end !important;
+}
+
+.message-wrapper.received {
+    justify-content: flex-start !important;
+}
+
+
+/* =====================================================
+   MESSAGE BUBBLE
+===================================================== */
+
+.message-bubble {
+    position: relative !important;
+    max-width: 75% !important;
+    min-width: 80px !important;
+    padding: 9px 12px !important;
+    border-radius: 10px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
+}
+
+
+/* =====================================================
+   MESSAGE ACTIONS
+
+   ALWAYS AFTER THE MESSAGE
+
+   Sent:
+   MESSAGE -> DOTS
+
+   Received:
+   MESSAGE -> DOTS
+===================================================== */
+
+.message-wrapper .message-bubble {
+    order: 1 !important;
+}
+
+.message-wrapper .message-actions {
+    order: 2 !important;
+}
+
+
+/* =====================================================
+   THREE DOT CONTAINER
+===================================================== */
+
+.message-actions {
+    position: relative !important;
+
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+
+    flex-shrink: 0 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+
+/* =====================================================
+   THREE DOT BUTTON
+===================================================== */
+
+.message-menu-button {
+    width: 28px !important;
+    height: 28px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    background: transparent !important;
+
+    color: #555 !important;
+
+    cursor: pointer !important;
+
+    font-size: 20px !important;
+    line-height: 28px !important;
+
+    border-radius: 50% !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.message-menu-button:hover {
+    background: #e9edf2 !important;
+}
+
+
+/* =====================================================
+   MESSAGE OPTIONS MENU
+===================================================== */
+
+.message-options-menu {
+    display: none;
+
+    position: absolute !important;
+
+    top: 30px !important;
+    right: 0 !important;
+    left: auto !important;
+
+    width: 190px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #ddd !important;
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 5px 18px rgba(0, 0, 0, 0.15) !important;
+
+    z-index: 999999 !important;
+
+    overflow: hidden !important;
+}
+
+.message-options-menu.show {
+    display: block;
+}
+
+
+/* =====================================================
+   MENU BUTTONS
+===================================================== */
+
+.message-options-menu button {
+    width: 100% !important;
+
+    padding: 10px 12px !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+    color: #333 !important;
+
+    text-align: left !important;
+
+    font-size: 13px !important;
+
+    cursor: pointer !important;
+}
+
+.message-options-menu button:hover {
+    background: #f5f7fb !important;
+}
+
+
+/* =====================================================
+   CHAT INPUT
+===================================================== */
+
+#chatInputWrapper {
+    flex-shrink: 0;
+    padding: 10px 15px 15px;
+    background: #f7f8fa;
+}
+
+
+/* =====================================================
+   TYPING INDICATOR
+===================================================== */
+
+#typing {
+    min-height: 18px;
+    padding: 0 15px;
+}
+
+
+/* =====================================================
+   REPLY PREVIEW
+===================================================== */
+
+#replyPreview {
+    position: relative;
+    margin: 0 15px 5px;
+    padding: 8px 35px 8px 10px;
+    background: #ffffff;
+    border-left: 3px solid #2196f3;
+    border-radius: 6px;
+    display: none;
+}
+
+#replyPreviewContent {
+    font-size: 12px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cancel-reply {
+    position: absolute;
+    right: 8px;
+    top: 6px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    color: #777;
+}
+
+
+/* =====================================================
+   PROFILE MENU
+===================================================== */
+
+.profile-menu-button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 17px;
+    color: #555;
+}
+
+.profile-menu-button:hover {
+    background: #eef1f4;
+}
+
+.profile-popup {
+    display: none;
+    position: absolute;
+    top: 48px;
+    right: 0;
+    width: 210px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    overflow: hidden;
+}
+
+.profile-popup.show {
+    display: block;
+}
+
+.profile-popup-header {
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-popup-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-popup-avatar,
+.receiver-profile-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    background: #2196f3;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-popup-name {
+    font-weight: 600;
+    color: #222;
+}
+
+.profile-option {
+    width: 100%;
+    border: none;
+    background: #ffffff;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    color: #333;
+}
+
+.profile-option:hover {
+    background: #f5f7fb;
+}
+
+
+/* =====================================================
+   RECEIVER PROFILE
+===================================================== */
+
+.receiver-profile-panel {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 280px;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+}
+
+.receiver-profile-panel.show {
+    display: block;
+}
+
+.receiver-profile-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.receiver-profile-row {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.receiver-profile-label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 3px;
+}
+
+.receiver-profile-value {
+    font-size: 14px;
+    color: #333;
+}
+
+
+/* =====================================================
+   MEDIA / LINKS / DOCS
+===================================================== */
+
+.media-links-docs-panel {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+}
+
+.media-links-docs-panel.show {
+    display: block;
+}
+
+.media-links-docs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.media-links-docs-title {
+    font-weight: 600;
+}
+
+.media-links-docs-close {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.media-links-docs-tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+}
+
+.media-links-docs-tab {
+    flex: 1;
+    border: none;
+    background: #ffffff;
+    padding: 9px 5px;
+    cursor: pointer;
+}
+
+.media-links-docs-tab.active {
+    color: #2196f3;
+    border-bottom: 2px solid #2196f3;
+}
+
+.media-links-docs-list {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.media-links-docs-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.media-links-docs-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.media-links-docs-icon {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f3f5;
+    border-radius: 6px;
+}
+
+.media-links-docs-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.media-links-docs-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.media-links-docs-action {
+    font-size: 12px;
+    color: #2196f3;
+}
+
+.media-links-docs-empty {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    .users-panel {
+        width: 240px;
+        min-width: 240px;
+    }
+
+    .message-bubble {
+        max-width: 70% !important;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .users-panel {
+        width: 200px;
+        min-width: 200px;
+    }
+
+    .message-bubble {
+        max-width: 65% !important;
+    }
+
+}
+
+/* =====================================================
+   RECEIVER PROFILE PANEL
+===================================================== */
+
+.receiver-profile-panel {
+    display: none;
+
+    position: absolute;
+
+    top: 70px;
+    right: 15px;
+
+    width: 280px;
+    max-width: calc(100% - 30px);
+
+    background: #ffffff;
+
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+
+    z-index: 5000;
+
+    overflow: hidden;
+}
+
+
+/* Open state */
+
+.receiver-profile-panel.show {
+    display: block;
+}
+
+
+/* =====================================================
+   PROFILE HEADER
+===================================================== */
+
+.receiver-profile-header {
+    padding: 18px;
+
+    background: #f7f9fc;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+
+/* =====================================================
+   USER ROW
+===================================================== */
+
+.receiver-profile-header .profile-popup-user {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.receiver-profile-avatar {
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+
+    border-radius: 50%;
+
+    background: #2196f3;
+
+    color: #ffffff;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+}
+
+
+/* =====================================================
+   USERNAME
+===================================================== */
+
+.receiver-profile-header .profile-popup-name {
+    font-size: 16px;
+
+    font-weight: 600;
+
+    color: #222222;
+
+    word-break: break-word;
+}
+
+
+/* =====================================================
+   PROFILE INFORMATION ROW
+===================================================== */
+
+.receiver-profile-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 13px 18px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+
+/* =====================================================
+   LABEL
+===================================================== */
+
+.receiver-profile-label {
+    font-size: 13px;
+
+    color: #777777;
+
+    flex-shrink: 0;
+}
+
+
+/* =====================================================
+   VALUE
+===================================================== */
+
+.receiver-profile-value {
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #333333;
+
+    text-align: right;
+
+    word-break: break-word;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+#receiverProfileStatus {
+    color: #219653;
+}
+
+
+/* =====================================================
+   CHAT HEADER POSITION
+===================================================== */
+
+.chat-panel {
+    position: relative;
+}
+
+
+/* =====================================================
+   RECEIVER HEADER
+===================================================== */
+
+.chat-header {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+}
+
+
+/* =====================================================
+   RECEIVER HEADER INFO
+===================================================== */
+
+.chat-header-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+/* =====================================================
+   RECEIVER NAME
+===================================================== */
+
+#chatWith {
+    margin: 0;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   HEADER THREE DOTS
+===================================================== */
+
+.receiver-header-actions {
+    position: relative;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+}
+
+
+/* =====================================================
+   HEADER THREE-DOT BUTTON
+===================================================== */
+
+.receiver-menu-button {
+    width: 36px;
+    height: 36px;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #555555;
+
+    cursor: pointer;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 18px;
+}
+
+
+.receiver-menu-button:hover {
+    background: #f0f2f5;
+}
+
+
+/* =====================================================
+   RECEIVER OPTIONS MENU
+===================================================== */
+
+.receiver-options-menu {
+    display: none;
+
+    position: absolute;
+
+    top: 42px;
+
+    right: 0;
+
+    width: 210px;
+
+    background: #ffffff;
+
+    border: 1px solid #dddddd;
+
+    border-radius: 10px;
+
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.15);
+
+    z-index: 6000;
+
+    overflow: hidden;
+}
+
+
+.receiver-options-menu.show {
+    display: block;
+}
+
+
+/* =====================================================
+   PROFILE OPTION
+===================================================== */
+
+.receiver-options-menu .profile-option {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding: 10px 14px;
+
+    border: none;
+
+    background: #ffffff;
+
+    color: #333333;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    text-align: left;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+
+.receiver-options-menu .profile-option:hover {
+    background: #f5f7fa;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .receiver-profile-panel {
+        top: 65px;
+
+        right: 10px;
+
+        width: 260px;
+    }
+
+}
+/* =====================================================
+   CHAT HEADER - FIXED LAYOUT
+===================================================== */
+
+.chat-panel {
+    position: relative !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    min-width: 0 !important;
+
+    overflow: hidden !important;
+}
+
+
+.chat-header {
+    position: relative !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    width: 100% !important;
+
+    min-height: 74px !important;
+
+    height: 74px !important;
+
+    padding: 10px 14px !important;
+
+    box-sizing: border-box !important;
+
+    flex-shrink: 0 !important;
+
+    background: #ffffff !important;
+
+    border-bottom: 1px solid #dddddd !important;
+
+    z-index: 2000 !important;
+}
+
+
+/* =====================================================
+   HEADER USER ICON
+===================================================== */
+
+.chat-header-icon {
+    width: 46px !important;
+
+    height: 46px !important;
+
+    min-width: 46px !important;
+
+    border-radius: 50% !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    background: #2196f3 !important;
+
+    color: white !important;
+
+    margin-right: 10px !important;
+}
+
+
+/* =====================================================
+   HEADER INFORMATION
+===================================================== */
+
+.chat-header-info {
+    position: relative !important;
+
+    flex: 1 !important;
+
+    min-width: 0 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    justify-content: center !important;
+}
+
+
+/* =====================================================
+   RECEIVER NAME
+===================================================== */
+
+#chatWith {
+    display: block !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    font-size: 16px !important;
+
+    line-height: 22px !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+
+    cursor: pointer !important;
+}
+
+
+/* =====================================================
+   TYPING
+===================================================== */
+
+#typing {
+    min-height: 0 !important;
+
+    font-size: 12px !important;
+}
+
+
+/* =====================================================
+   HEADER THREE DOTS
+===================================================== */
+
+.receiver-header-actions {
+    position: relative !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    width: 40px !important;
+
+    min-width: 40px !important;
+
+    height: 40px !important;
+
+    margin-left: 8px !important;
+
+    flex-shrink: 0 !important;
+
+    z-index: 3000 !important;
+}
+
+
+/* =====================================================
+   RECEIVER HEADER THREE DOT BUTTON
+===================================================== */
+
+.receiver-menu-button {
+    width: 36px !important;
+
+    height: 36px !important;
+
+    min-width: 36px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    border: none !important;
+
+    outline: none !important;
+
+    background: transparent !important;
+
+    color: #555 !important;
+
+    border-radius: 50% !important;
+
+    cursor: pointer !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    font-size: 18px !important;
+}
+
+
+.receiver-menu-button:hover {
+    background: #f0f2f5 !important;
+}
+
+
+/* =====================================================
+   RECEIVER OPTIONS
+===================================================== */
+
+.receiver-options-menu {
+    display: none !important;
+
+    position: absolute !important;
+
+    top: 42px !important;
+
+    right: 0 !important;
+
+    left: auto !important;
+
+    width: 220px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #dddddd !important;
+
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 6px 22px rgba(0, 0, 0, 0.18) !important;
+
+    z-index: 999999 !important;
+
+    overflow: hidden !important;
+}
+
+
+.receiver-options-menu.show {
+    display: block !important;
+}
+
+
+/* =====================================================
+   RECEIVER MENU BUTTONS
+===================================================== */
+
+.receiver-options-menu .profile-option {
+    width: 100% !important;
+
+    min-height: 44px !important;
+
+    padding: 10px 14px !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+
+    color: #333333 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+
+    text-align: left !important;
+
+    font-size: 13px !important;
+
+    cursor: pointer !important;
+}
+
+
+.receiver-options-menu .profile-option:hover {
+    background: #f5f7fa !important;
+}
+
+
+/* =====================================================
+   DISAPPEARING MESSAGE MENU
+===================================================== */
+
+.disappearing-options {
+    display: none !important;
+
+    position: absolute !important;
+
+    top: 42px !important;
+
+    right: 0 !important;
+
+    left: auto !important;
+
+    width: 210px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #dddddd !important;
+
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 6px 22px rgba(0, 0, 0, 0.18) !important;
+
+    z-index: 999999 !important;
+
+    overflow: hidden !important;
+
+    padding: 6px !important;
+}
+
+
+.disappearing-options.show {
+    display: block !important;
+}
+
+
+.disappearing-title {
+    padding: 9px 10px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 600 !important;
+
+    color: #333333 !important;
+}
+
+
+.disappearing-option {
+    width: 100% !important;
+
+    padding: 9px 10px !important;
+
+    border: none !important;
+
+    background: #ffffff !important;
+
+    text-align: left !important;
+
+    cursor: pointer !important;
+
+    border-radius: 6px !important;
+
+    font-size: 13px !important;
+}
+
+
+.disappearing-option:hover {
+    background: #f3f5f7 !important;
+}
+
+
+/* =====================================================
+   SEARCH BAR
+   HIDDEN UNTIL OPENED
+===================================================== */
+
+.compact-message-search {
+    display: none;
+
+    position: absolute !important;
+
+    left: 0 !important;
+
+    right: 0 !important;
+
+    top: 0 !important;
+
+    width: 100% !important;
+
+    height: 48px !important;
+
+    background: #ffffff !important;
+
+    z-index: 4000 !important;
+}
+
+
+/*
+   If JavaScript opens it with inline display,
+   inline style will still work.
+*/
+
+.compact-message-search[style*="display: block"] {
+    display: block !important;
+}
+
+
+/* =====================================================
+   RECEIVER PROFILE
+===================================================== */
+
+.receiver-profile-panel {
+    display: none !important;
+
+    position: absolute !important;
+
+    top: 78px !important;
+
+    right: 15px !important;
+
+    width: 280px !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #dddddd !important;
+
+    border-radius: 14px !important;
+
+    box-shadow:
+        0 8px 28px rgba(0, 0, 0, 0.18) !important;
+
+    z-index: 8000 !important;
+
+    overflow: hidden !important;
+}
+
+
+.receiver-profile-panel.show {
+    display: block !important;
+}
+
+
+/* =====================================================
+   PROFILE HEADER
+===================================================== */
+
+.receiver-profile-header {
+    padding: 18px !important;
+
+    background: #f7f9fc !important;
+
+    border-bottom: 1px solid #eeeeee !important;
+}
+
+
+.receiver-profile-header .profile-popup-user {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 12px !important;
+}
+
+
+.receiver-profile-avatar {
+    width: 48px !important;
+
+    height: 48px !important;
+
+    min-width: 48px !important;
+
+    border-radius: 50% !important;
+
+    background: #2196f3 !important;
+
+    color: white !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+}
+
+
+.receiver-profile-row {
+    display: flex !important;
+
+    justify-content: space-between !important;
+
+    align-items: center !important;
+
+    padding: 13px 18px !important;
+
+    border-bottom: 1px solid #eeeeee !important;
+
+    gap: 15px !important;
+}
